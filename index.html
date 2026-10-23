@@ -141,6 +141,79 @@
       gap: 12px;
     }
 
+    .hearts-box {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 1.15rem;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+      transition: transform 0.15s ease;
+      cursor: default;
+    }
+
+    .hearts-box.heart-hit {
+      animation: heartHitShake 0.35s ease;
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    @keyframes heartHitShake {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.25) rotate(-6deg); }
+      75% { transform: scale(0.92) rotate(6deg); }
+    }
+
+    .love-hud-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    .love-hud-box.love-ready-pulse {
+      animation: loveReadyGlow 0.6s infinite alternate;
+      border-color: #fbbf24;
+    }
+
+    @keyframes loveReadyGlow {
+      from { box-shadow: 0 0 4px rgba(251, 191, 36, 0.4); }
+      to { box-shadow: 0 0 16px rgba(251, 191, 36, 0.95); }
+    }
+
+    .love-hud-bar-track {
+      width: 55px;
+      height: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .love-hud-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f43f5e, #fb7185);
+      border-radius: 4px;
+      transition: width 0.2s ease;
+    }
+
+    .love-hud-text {
+      font-family: var(--font-retro);
+      font-size: 0.68rem;
+      color: #fda4af;
+      min-width: 34px;
+      text-align: right;
+    }
+
     .score-box {
       font-family: var(--font-retro);
       font-size: 0.78rem;
@@ -549,6 +622,16 @@
       </div>
 
       <div class="hud-stats">
+        <div class="hearts-box" id="hudHeartsBox" title="Lives Remaining">
+          <span id="hudHearts">❤️❤️❤️</span>
+        </div>
+        <div class="love-hud-box" id="hudLoveBox" title="Love Meter" style="display:none;">
+          <span style="font-size: 1rem;">💖</span>
+          <div class="love-hud-bar-track">
+            <div class="love-hud-bar-fill" id="hudLoveFill" style="width:0%;"></div>
+          </div>
+          <span class="love-hud-text" id="hudLoveText">0%</span>
+        </div>
         <div class="score-box">
           <span class="hi-score" id="hiScoreText">HI 00000</span>
           <span class="current-score" id="scoreText">00000</span>
@@ -2453,19 +2536,19 @@
             attackObjX = this.projectileX;
           } else {
             // Enemy lunges fast straight at hero
-            this.enemyX -= 520 * dt;
+            this.enemyX -= 540 * dt;
             attackObjX = this.enemyX;
           }
 
-          // Check physical contact when attack object reaches hero
-          const inHitZone = (attackObjX <= game.hero.x + 55 && attackObjX >= game.hero.x - 35);
+          // As soon as attack object reaches hero's strike boundary
+          const reachedHero = (attackObjX <= game.hero.x + 65);
 
-          if (!this.hitRegistered && !this.dodgeSuccess && inHitZone) {
+          if (!this.hitRegistered && !this.dodgeSuccess && reachedHero) {
             // If in LOVE MODE, hero is invincible and automatically deflects the attack!
             if (game.loveModeTimer > 0) {
               this.dodgeSuccess = true;
               this.onDodged(true, game);
-              game.particles.emitBurst(attackObjX, CONFIG.canvas.groundY - 50, 16, '#ec4899', 140, 'heart');
+              game.particles.emitBurst(attackObjX, CONFIG.canvas.groundY - 50, 18, '#ec4899', 150, 'heart');
             } else {
               const dodged = this.checkDodge(game.hero);
               if (dodged) {
@@ -2483,7 +2566,7 @@
                 game.triggerHit(1);
 
                 // If Heroine is with Hero in RUN_TOGETHER, villain kidnaps her!
-                if (game.heroine.active && game.state === 'RUN_TOGETHER') {
+                if (game.heroine?.active && game.state === 'RUN_TOGETHER') {
                   game.triggerKidnap(this.attacker);
                   return;
                 }
@@ -2492,6 +2575,26 @@
           }
 
           if (this.phaseTimer <= 0) {
+            // Final guarantee: if strike timer completed without dodge, register hit!
+            if (!this.hitRegistered && !this.dodgeSuccess) {
+              if (game.loveModeTimer > 0) {
+                this.dodgeSuccess = true;
+                this.onDodged(true, game);
+              } else {
+                const dodged = this.checkDodge(game.hero);
+                if (dodged) {
+                  this.dodgeSuccess = true;
+                  this.onDodged(false, game);
+                } else {
+                  this.hitRegistered = true;
+                  game.triggerHit(1);
+                  if (game.heroine?.active && game.state === 'RUN_TOGETHER') {
+                    game.triggerKidnap(this.attacker);
+                    return;
+                  }
+                }
+              }
+            }
             this.phase = 'RECOVER';
             this.phaseTimer = CONFIG.attack.recoverDuration;
             this.shakeAmt = 0;
@@ -2787,9 +2890,31 @@
         this.fightHitsLeft = CONFIG.fight.rounds;
         this.attackBtnEl = document.getElementById('attackBtn');
 
+        // Love System (0-100)
+        this.loveMeter = 0;
+        this.togetherDistance = 0;
+        this.lastTogetherDistanceMark = 0;
+        this.loveModeTimer = 0;
+        this.loveCooldown = 0;
+        this.loveReady = false;
+        this.loveReadyWaitTimer = 0;
+        this.kissTimer = 0;
+        this.kissInterruption = 0;
+        this.milestonesReached = { 500: false, 1000: false, 2000: false };
+        this.milestoneBannerText = '';
+        this.milestoneBannerSubtext = '';
+        this.milestoneBannerTimer = 0;
+        this.damageFlashTimer = 0;
+        this.floatingTexts = [];
+
         // Cache UI elements
         this.scoreEl = document.getElementById('scoreText');
         this.hiScoreEl = document.getElementById('hiScoreText');
+        this.hudHeartsEl = document.getElementById('hudHearts');
+        this.hudHeartsBoxEl = document.getElementById('hudHeartsBox');
+        this.hudLoveBoxEl = document.getElementById('hudLoveBox');
+        this.hudLoveFillEl = document.getElementById('hudLoveFill');
+        this.hudLoveTextEl = document.getElementById('hudLoveText');
         this.loadingOverlay = document.getElementById('loadingOverlay');
         this.loadingProgress = document.getElementById('loadingProgress');
         this.loadingPct = document.getElementById('loadingPct');
@@ -2804,6 +2929,7 @@
 
         this.initCanvasResolution();
         this.updateHiScoreDisplay();
+        this.updateHUDStats();
         this.bindGlobalControls();
         this.loadAssets();
       }
@@ -2831,16 +2957,65 @@
         });
       }
 
+      updateHUDStats() {
+        if (this.scoreEl) {
+          this.scoreEl.textContent = String(Math.floor(this.score)).padStart(5, '0');
+        }
+        if (this.hudHeartsEl) {
+          let heartsStr = '';
+          for (let i = 0; i < CONFIG.player.maxLives; i++) {
+            heartsStr += i < this.lives ? '❤️' : '🖤';
+          }
+          this.hudHeartsEl.textContent = heartsStr;
+        }
+        if (this.hudLoveBoxEl) {
+          const showLove = this.heroine?.active && (this.state === 'RUN_TOGETHER' || this.state === 'KISS_MOMENT');
+          this.hudLoveBoxEl.style.display = showLove ? 'flex' : 'none';
+          if (showLove) {
+            const pct = Math.floor(this.loveMeter);
+            if (this.hudLoveFillEl) {
+              this.hudLoveFillEl.style.width = `${pct}%`;
+              if (this.loveModeTimer > 0) {
+                this.hudLoveFillEl.style.background = 'linear-gradient(90deg, #fbbf24, #f43f5e)';
+              } else {
+                this.hudLoveFillEl.style.background = 'linear-gradient(90deg, #f43f5e, #fb7185)';
+              }
+            }
+            if (this.hudLoveTextEl) {
+              if (this.loveModeTimer > 0) {
+                this.hudLoveTextEl.textContent = `★ ${Math.ceil(this.loveModeTimer)}s`;
+                this.hudLoveTextEl.style.color = '#fbbf24';
+              } else if (this.loveCooldown > 0) {
+                this.hudLoveTextEl.textContent = `⏳ ${Math.ceil(this.loveCooldown)}s`;
+                this.hudLoveTextEl.style.color = '#94a3b8';
+              } else if (this.loveReady) {
+                this.hudLoveTextEl.textContent = 'READY!';
+                this.hudLoveTextEl.style.color = '#fbbf24';
+              } else {
+                this.hudLoveTextEl.textContent = `${pct}%`;
+                this.hudLoveTextEl.style.color = '#fda4af';
+              }
+            }
+            if (this.loveReady) {
+              this.hudLoveBoxEl.classList.add('love-ready-pulse');
+            } else {
+              this.hudLoveBoxEl.classList.remove('love-ready-pulse');
+            }
+          }
+        }
+      }
+
       isPlayingState() {
         return [
           'RUNNING_SOLO', 'HEROINE_MEET', 'RUN_TOGETHER',
           'ENEMY1_AMBUSH', 'ESCAPE', 'ENEMY2_CHASE',
-          'KIDNAP_CUTSCENE', 'RESCUE_CHASE', 'RESCUE_FIGHT', 'HEROINE_RESCUED'
+          'KIDNAP_CUTSCENE', 'RESCUE_CHASE', 'RESCUE_FIGHT', 'HEROINE_RESCUED',
+          'KISS_MOMENT'
         ].includes(this.state);
       }
 
       isCutsceneState() {
-        return ['KIDNAP_CUTSCENE', 'HEROINE_RESCUED'].includes(this.state);
+        return ['KIDNAP_CUTSCENE', 'HEROINE_RESCUED', 'KISS_MOMENT'].includes(this.state);
       }
 
       updateHiScoreDisplay() {
@@ -2886,6 +3061,9 @@
               // Tap to skip cutscene
               this.cutsceneTimer = 0;
               this.triggerRescueChase();
+            } else if (this.state === 'KISS_MOMENT') {
+              // Tap to skip kiss cutscene
+              this.skipKissMoment();
             } else if (this.isPlayingState()) {
               if (this.state === 'RESCUE_FIGHT' && this.fightPhase === 'RECOVER') {
                 this.executeFightAttack();
@@ -3015,7 +3193,26 @@
         this.fightPhaseTimer = 0;
         this._setAttackBtn(false);
 
+        // Reset love system
+        this.loveMeter = 0;
+        this.togetherDistance = 0;
+        this.lastTogetherDistanceMark = 0;
+        this.loveModeTimer = 0;
+        this.loveCooldown = 0;
+        this.loveReady = false;
+        this.loveReadyWaitTimer = 0;
+        this.kissTimer = 0;
+        this.kissInterruption = 0;
+        this.milestonesReached = { 500: false, 1000: false, 2000: false };
+        this.milestoneBannerText = '';
+        this.milestoneBannerSubtext = '';
+        this.milestoneBannerTimer = 0;
+        this.damageFlashTimer = 0;
+        this.floatingTexts = [];
+
         this.state = 'RUNNING_SOLO';
+
+        this.updateHUDStats();
 
         this.startOverlay?.classList.add('hidden');
         this.gameOverOverlay?.classList.add('hidden');
@@ -3069,10 +3266,14 @@
         if (this.finalDistanceVal) this.finalDistanceVal.textContent = `${Math.floor(this.distance)}m`;
         if (this.finalBestVal) this.finalBestVal.textContent = String(this.highScore).padStart(5, '0');
 
+        this.updateHUDStats();
+
         setTimeout(() => { this.gameOverOverlay?.classList.remove('hidden'); }, 500);
       }
 
       triggerHit(damage = 1) {
+        // Invincible during LOVE MODE
+        if (this.loveModeTimer > 0) return;
         if (this.hero.invulnerableTimer > 0) return;
 
         // Shield absorbs hit
@@ -3087,17 +3288,33 @@
         // Hero & obstacles or enemies meet: reduce a heart!
         this.lives -= damage;
         this.comboStreak = 0;
-        this.screenShake = 14;
+        this.screenShake = 16;
+        this.damageFlashTimer = 0.35;
         this.hero.invulnerableTimer = CONFIG.player.invulnerabilityDuration;
         this.audio.playHit();
         if ('vibrate' in navigator) navigator.vibrate([40, 30, 80]);
 
+        // Floating damage indicator
+        this.addFloatingText(`-${damage} ❤️`, this.hero.x + 20, this.hero.y - 75, '#ef4444');
+
+        // Tactile shake animation on header hearts
+        if (this.hudHeartsBoxEl) {
+          this.hudHeartsBoxEl.classList.remove('heart-hit');
+          void this.hudHeartsBoxEl.offsetWidth;
+          this.hudHeartsBoxEl.classList.add('heart-hit');
+          setTimeout(() => this.hudHeartsBoxEl?.classList.remove('heart-hit'), 400);
+        }
+
+        // Drop Love Meter by -15 when hit!
+        if (this.heroine?.active && this.state === 'RUN_TOGETHER') {
+          this.addLove(-CONFIG.love.dropPerHit);
+        }
+
+        this.updateHUDStats();
+
         if (this.state === 'ENEMY2_CHASE') {
           this.enemy2.danger = Math.min(100, this.enemy2.danger + CONFIG.chase.hitSpike);
         }
-
-        // Note: Obstacles (cacti/birds) do NOT kidnap heroine!
-        // Kidnapping is only triggered directly when an enemy strikes hero during RUN_TOGETHER.
 
         if (this.lives <= 0) {
           this.endGame('LIVES_OUT');
@@ -3118,6 +3335,117 @@
         if ('vibrate' in navigator) navigator.vibrate([60, 40, 100, 40, 60]);
         // Stun hero briefly
         this.hero.invulnerableTimer = CONFIG.kidnap.cutsceneDuration + 0.6;
+
+        // Love meter resets to 0 if heroine is kidnapped!
+        this.loveMeter = 0;
+        this.loveReady = false;
+        this.loveReadyWaitTimer = 0;
+        this.updateHUDStats();
+      }
+
+      // ======================================================================
+      // LOVE SYSTEM (0-100) & KISS_MOMENT CUTSCENE
+      // ======================================================================
+      addLove(amount) {
+        // Love system is ONLY active while heroine is with hero
+        if (!this.heroine?.active || this.state !== 'RUN_TOGETHER') return;
+        // Cannot fill while in LOVE MODE or during cooldown
+        if (this.loveModeTimer > 0 || this.loveCooldown > 0) return;
+
+        const oldVal = this.loveMeter;
+        this.loveMeter = Math.max(0, Math.min(100, this.loveMeter + amount));
+
+        if (amount > 0 && Math.floor(this.loveMeter) > Math.floor(oldVal)) {
+          this.particles.emitBurst(
+            this.hero.x + (this.heroine.x - this.hero.x) * 0.5 + 20,
+            CONFIG.canvas.groundY - 70,
+            amount > 3 ? 8 : 4,
+            '#fb7185',
+            80,
+            'heart'
+          );
+        }
+
+        if (amount < 0) {
+          this.addFloatingText(`${amount} 💔`, this.hero.x + 20, this.hero.y - 65, '#f43f5e');
+        }
+
+        this.updateHUDStats();
+
+        // Check Kiss trigger when hitting 100
+        if (this.loveMeter >= 100 && !this.loveReady && this.state === 'RUN_TOGETHER') {
+          if (this.checkCanStartKiss()) {
+            this.triggerKissMoment();
+          } else {
+            this.loveReady = true;
+            this.loveReadyWaitTimer = 0;
+            this.updateHUDStats();
+          }
+        }
+      }
+
+      checkCanStartKiss() {
+        if (this.state !== 'RUN_TOGETHER') return false;
+        // Never trigger during enemy attack telegraph or strike
+        if (this.attackDirector && this.attackDirector.phase !== 'IDLE') return false;
+        // Never trigger if enemy within 400px of player
+        if (this.attackDirector && this.attackDirector.enemyX < this.hero.x + CONFIG.love.safeDistanceEnemy && this.attackDirector.enemyX > 0) return false;
+        if (this.enemy1?.active && Math.abs(this.enemy1.x - this.hero.x) < CONFIG.love.safeDistanceEnemy) return false;
+        if (this.enemy2?.active && Math.abs(this.enemy2.x - this.hero.x) < CONFIG.love.safeDistanceEnemy) return false;
+        // Never trigger during RESCUE_CHASE or RESCUE_FIGHT
+        if (this.state === 'RESCUE_CHASE' || this.state === 'RESCUE_FIGHT') return false;
+        return true;
+      }
+
+      triggerKissMoment() {
+        this.state = 'KISS_MOMENT';
+        this.loveReady = false;
+        this.loveReadyWaitTimer = 0;
+        this.kissTimer = CONFIG.love.kissDuration; // 3.0s
+        this.kissInterruption = Math.floor(Math.random() * 4); // 0: crow, 1: enemy peek, 2: balloon pop, 3: heroine talk
+        this.audio.playKissMwah();
+        if (this.kissInterruption === 0) {
+          setTimeout(() => { if (this.state === 'KISS_MOMENT') this.audio.playCrowCaw(); }, 1400);
+        } else if (this.kissInterruption === 2) {
+          setTimeout(() => { if (this.state === 'KISS_MOMENT') this.audio.playBalloonPop(); }, 1500);
+        }
+        // Emit romantic heart burst
+        this.particles.emitBurst(CONFIG.canvas.width * 0.5, CONFIG.canvas.groundY - 70, 36, '#ec4899', 160, 'heart');
+        this.updateHUDStats();
+      }
+
+      skipKissMoment() {
+        if (this.state !== 'KISS_MOMENT') return;
+        this.kissTimer = 0;
+        this.triggerLoveMode();
+      }
+
+      triggerLoveMode() {
+        this.state = 'RUN_TOGETHER';
+        this.loveModeTimer = CONFIG.love.loveModeDuration; // 10.0s
+        this.loveCooldown = CONFIG.love.cooldownDuration;  // 30.0s cooldown
+        this.loveMeter = 0;
+        this.loveReady = false;
+        this.audio.playLoveModeTheme();
+        this.showMilestoneBanner("💖 LOVE MODE! 💖", "INVINCIBLE • 2X SCORE • COIN MAGNET • 10s");
+        this.particles.emitBurst(this.hero.x + 30, this.hero.y - 50, 40, '#fbbf24', 220, 'star');
+        this.updateHUDStats();
+      }
+
+      showMilestoneBanner(text, subtext = '') {
+        this.milestoneBannerText = text;
+        this.milestoneBannerSubtext = subtext;
+        this.milestoneBannerTimer = 3.5;
+        this.audio.playMilestoneJingle();
+      }
+
+      addFloatingText(text, x, y, color = '#fbbf24') {
+        this.floatingTexts.push({
+          text, x, y, color,
+          vy: -35,
+          alpha: 1.0,
+          life: 1.2
+        });
       }
 
       triggerRescueChase() {
@@ -3236,14 +3564,84 @@
           this.screenShake -= dt * 25;
         }
 
+        // Damage screen flash decay
+        if (this.damageFlashTimer > 0) {
+          this.damageFlashTimer -= dt;
+        }
+
+        // Milestone banner timer decay
+        if (this.milestoneBannerTimer > 0) {
+          this.milestoneBannerTimer -= dt;
+        }
+
+        // Floating texts update
+        for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+          const ft = this.floatingTexts[i];
+          ft.y += ft.vy * dt;
+          ft.life -= dt;
+          ft.alpha = Math.max(0, ft.life / 1.2);
+          if (ft.life <= 0) this.floatingTexts.splice(i, 1);
+        }
+
+        // Love Mode Timer & Cooldown
+        if (this.loveModeTimer > 0) {
+          this.loveModeTimer -= dt;
+          // Spawn cheerful romantic heart trail behind hero & heroine
+          if (Math.random() < 0.45) {
+            this.particles.emit(
+              this.hero.x - 10 + Math.random() * 25,
+              CONFIG.canvas.groundY - 20 - Math.random() * 45,
+              -85, -25 - Math.random() * 30,
+              6 + Math.random() * 5,
+              Math.random() < 0.5 ? '#f43f5e' : '#fbbf24',
+              0.8,
+              'heart'
+            );
+          }
+          if (this.loveModeTimer <= 0) {
+            this.loveModeTimer = 0;
+            this.updateHUDStats();
+          }
+        }
+
+        if (this.loveCooldown > 0) {
+          this.loveCooldown -= dt;
+          if (this.loveCooldown <= 0) {
+            this.loveCooldown = 0;
+            this.updateHUDStats();
+          }
+        }
+
         if (!this.isPlayingState()) return;
+
+        // KISS_MOMENT cutscene update: pause normal progression, slowmo romantic atmosphere
+        if (this.state === 'KISS_MOMENT') {
+          this.kissTimer -= dt;
+          if (Math.random() < 0.25) {
+            this.particles.emit(
+              CONFIG.canvas.width * 0.35 + Math.random() * CONFIG.canvas.width * 0.3,
+              CONFIG.canvas.groundY - 40 - Math.random() * 90,
+              (Math.random() - 0.5) * 30,
+              -Math.random() * 35 - 15,
+              7 + Math.random() * 5,
+              '#fb7185',
+              1.2,
+              'heart'
+            );
+          }
+          this.particles.update(dt);
+          if (this.kissTimer <= 0) {
+            this.triggerLoveMode();
+          }
+          return;
+        }
 
         const speed = this.getCurrentSpeed();
         const deltaDist = (speed * dt) * 0.05; // 1 unit ~ 20px
         this.distance += deltaDist;
 
-        // Score progression (2x bonus if active)
-        const scoreMultiplier = this.activePowerUps.doubleScore > 0 ? 2 : 1;
+        // Score progression (2x bonus if active or during LOVE MODE)
+        const scoreMultiplier = (this.activePowerUps.doubleScore > 0 || this.loveModeTimer > 0) ? 2 : 1;
         this.score += deltaDist * scoreMultiplier;
 
         // Milestone audio ding
@@ -3255,9 +3653,7 @@
           setTimeout(() => this.scoreEl?.classList.remove('milestone-flash'), 800);
         }
 
-        if (this.scoreEl) {
-          this.scoreEl.textContent = String(Math.floor(this.score)).padStart(5, '0');
-        }
+        this.updateHUDStats();
 
         // Active Powerup Timers
         Object.keys(this.activePowerUps).forEach(key => {
@@ -3297,7 +3693,7 @@
           }
         }
 
-        // 2. RUN_TOGETHER — frequent enemy attacks, kidnap loop
+        // 2. RUN_TOGETHER — frequent enemy attacks, kidnap loop, love system & milestones
         if (this.state === 'RUN_TOGETHER') {
           if (!this.attackDirector.active) {
             this.attackDirector.active = true;
@@ -3305,11 +3701,44 @@
           if (!this.isCutsceneState()) {
             this.attackDirector.update(dt, this);
           }
+
+          // Track distance together
+          this.togetherDistance += deltaDist;
+
+          // +1 Love per 20m together
+          if (this.togetherDistance - this.lastTogetherDistanceMark >= CONFIG.love.fillPerMetersTogether) {
+            this.lastTogetherDistanceMark = this.togetherDistance;
+            this.addLove(1);
+          }
+
+          // Milestones: 500m, 1000m, 2000m
+          if (this.togetherDistance >= 500 && !this.milestonesReached[500]) {
+            this.milestonesReached[500] = true;
+            this.showMilestoneBanner("500m TOGETHER! 💕", "Vicky: Naan unna kaapathuven! | Mrunal: Paathukalam da!");
+          } else if (this.togetherDistance >= 1000 && !this.milestonesReached[1000]) {
+            this.milestonesReached[1000] = true;
+            this.showMilestoneBanner("1000m TOGETHER! 💖", "Mrunal: Innum evlo dhooram? | Vicky: Un kooda engaiyum!");
+          } else if (this.togetherDistance >= 2000 && !this.milestonesReached[2000]) {
+            this.milestonesReached[2000] = true;
+            this.showMilestoneBanner("2000m MILESTONE! 💍", "Jodi No. 1! Keep running!");
+          }
+
+          // Handle LOVE_READY safety wait
+          if (this.loveReady) {
+            this.loveReadyWaitTimer += dt;
+            if (this.checkCanStartKiss()) {
+              this.triggerKissMoment();
+            } else if (this.loveReadyWaitTimer >= CONFIG.love.readyMaxWait) {
+              if (this.attackDirector) this.attackDirector._endAttack(this);
+              this.triggerKissMoment();
+            }
+          }
         }
 
         // 3. ENEMY1_AMBUSH approach & dodge quick-time event
         if (this.state === 'ENEMY1_AMBUSH' && this.enemy1.active) {
           this.enemy1.x -= speed * dt;
+          this.enemy1.update(dt, speed);
 
           if (this.enemy1.x < CONFIG.canvas.width - 240 && !this.enemy1.spoken) {
             this.enemy1.spoken = true;
@@ -3336,7 +3765,7 @@
                   this.state = 'ENEMY2_CHASE';
                   this.enemy2.startChase();
                 }, 1400);
-              } else if (this.enemy1.attackProgress >= 0.75) {
+              } else {
                 this.triggerHit(1);
                 this.enemy1.escaped = true;
                 setTimeout(() => {
@@ -3506,6 +3935,15 @@
 
           // Collision
           if (this.checkCollision(heroBox, obs.getHitbox())) {
+            if (this.loveModeTimer > 0) {
+              // LOVE MODE: Invincible! Smashes obstacle into heart bursts!
+              this.obstacles.splice(i, 1);
+              this.score += 50;
+              this.particles.emitBurst(obs.x + obs.width * 0.5, obs.y - obs.height * 0.5, 20, '#f43f5e', 180, 'heart');
+              this.audio.playPowerUp();
+              this.addFloatingText('+50 ❤️ SMASH!', obs.x, obs.y - 40, '#fb7185');
+              continue;
+            }
             this.triggerHit(1);
             this.obstacles.splice(i, 1);
             continue;
@@ -3517,7 +3955,7 @@
         }
 
         // Collectibles update & collection
-        const hasMagnet = this.activePowerUps.magnet > 0;
+        const hasMagnet = this.activePowerUps.magnet > 0 || this.loveModeTimer > 0;
         for (let i = this.collectibles.length - 1; i >= 0; i--) {
           const col = this.collectibles[i];
           col.update(dt, speed, this.hero, hasMagnet);
@@ -3527,6 +3965,7 @@
               this.score += 25;
               this.audio.playCoin();
               this.particles.emitBurst(col.x, col.y, 8, '#fbbf24', 90, 'star');
+              this.addLove(CONFIG.love.fillPerCollect);
               if (this.state === 'RESCUE_CHASE') {
                 this.rescueMeter = Math.min(100, this.rescueMeter + 5);
               }
@@ -3534,14 +3973,18 @@
               this.activePowerUps.shield = CONFIG.powerUps.shieldDuration;
               this.audio.playPowerUp();
               this.particles.emitBurst(col.x, col.y, 16, '#38bdf8', 120);
+              this.addLove(CONFIG.love.fillPerCollect);
             } else if (col.type === 'magnet') {
               this.activePowerUps.magnet = CONFIG.powerUps.magnetDuration;
               this.audio.playPowerUp();
               this.particles.emitBurst(col.x, col.y, 16, '#ef4444', 120);
+              this.addLove(CONFIG.love.fillPerCollect);
             } else if (col.type === 'heart') {
               this.lives = Math.min(CONFIG.player.maxLives, this.lives + 1);
               this.audio.playPowerUp();
               this.particles.emitBurst(col.x, col.y, 16, '#ec4899', 120, 'heart');
+              this.addLove(CONFIG.love.fillPerCollect);
+              this.updateHUDStats();
             }
 
             this.collectibles.splice(i, 1);
@@ -3590,8 +4033,18 @@
         }
 
         // 4. Characters
-        this.heroine.draw(this.ctx, this.hero.isDucking);
-        this.hero.draw(this.ctx, this.activePowerUps.shield > 0);
+        if (this.loveModeTimer > 0) {
+          // Romantic golden glow aura in LOVE MODE
+          this.ctx.save();
+          this.ctx.shadowColor = '#fbbf24';
+          this.ctx.shadowBlur = 24;
+          this.heroine.draw(this.ctx, this.hero.isDucking);
+          this.hero.draw(this.ctx, this.activePowerUps.shield > 0);
+          this.ctx.restore();
+        } else {
+          this.heroine.draw(this.ctx, this.hero.isDucking);
+          this.hero.draw(this.ctx, this.activePowerUps.shield > 0);
+        }
 
         // 5. Villains & Frequent Animated Enemy Attacks (enemy1.png & ememy2.png)
         if (this.enemy1?.active) this.enemy1.draw(this.ctx);
@@ -3680,10 +4133,256 @@
         // 8. Particles
         this.particles.draw(this.ctx);
 
-        // 9. IN-GAME HUD OVERLAYS (Lives, Danger Meter, Powerup timers)
+        // 8b. Floating Texts (-1 ❤️, +50 ❤️ SMASH, etc.)
+        this.floatingTexts.forEach(ft => {
+          this.ctx.save();
+          this.ctx.globalAlpha = ft.alpha;
+          this.ctx.font = 'bold 12px "Press Start 2P", monospace';
+          this.ctx.fillStyle = ft.color;
+          this.ctx.shadowColor = '#000';
+          this.ctx.shadowBlur = 4;
+          this.ctx.fillText(ft.text, ft.x, ft.y);
+          this.ctx.restore();
+        });
+
+        // 8c. KISS_MOMENT Cutscene Overlay
+        if (this.state === 'KISS_MOMENT') {
+          this.drawKissCutscene(this.ctx);
+        }
+
+        // 8d. Red damage screen flash
+        if (this.damageFlashTimer > 0) {
+          this.ctx.save();
+          this.ctx.fillStyle = `rgba(239, 68, 68, ${this.damageFlashTimer * 0.75})`;
+          this.ctx.fillRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
+          this.ctx.restore();
+        }
+
+        // 8e. Milestone Romantic Dialogue Banner
+        if (this.milestoneBannerTimer > 0 && this.milestoneBannerText) {
+          const cx = CONFIG.canvas.width * 0.5;
+          const alpha = Math.min(1, this.milestoneBannerTimer);
+          this.ctx.save();
+          this.ctx.globalAlpha = alpha;
+          this.ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+          this.ctx.strokeStyle = '#ec4899';
+          this.ctx.lineWidth = 2;
+          this.ctx.shadowColor = '#ec4899';
+          this.ctx.shadowBlur = 12;
+          this.ctx.beginPath();
+          this.ctx.roundRect(cx - 240, 60, 480, 52, 12);
+          this.ctx.fill();
+          this.ctx.stroke();
+
+          this.ctx.fillStyle = '#fbbf24';
+          this.ctx.font = 'bold 11px "Press Start 2P", monospace';
+          this.ctx.textAlign = 'center';
+          this.ctx.fillText(this.milestoneBannerText, cx, 82);
+
+          if (this.milestoneBannerSubtext) {
+            this.ctx.fillStyle = '#fce7f3';
+            this.ctx.font = 'bold 11px sans-serif';
+            this.ctx.fillText(this.milestoneBannerSubtext, cx, 101);
+          }
+          this.ctx.restore();
+        }
+
+        // 9. IN-GAME HUD OVERLAYS (Lives, Danger Meter, Powerup timers, Big Love Heart)
         this.drawHUD();
 
         this.ctx.restore();
+      }
+
+      drawLoveHeart(ctx, x, y, size, fillPct, isReady, isLoveMode) {
+        ctx.save();
+        ctx.translate(x, y);
+
+        // Heart beat scaling
+        let scale = 1.0;
+        if (isReady || fillPct >= 0.8 || isLoveMode) {
+          scale = 1.0 + Math.sin(performance.now() * 0.008) * 0.12;
+        }
+        ctx.scale(scale, scale);
+
+        const w = size;
+        const h = size;
+
+        const drawHeartPath = () => {
+          ctx.beginPath();
+          const topCurve = h * 0.3;
+          ctx.moveTo(0, topCurve);
+          ctx.bezierCurveTo(-w * 0.5, -topCurve * 0.6, -w * 0.65, topCurve * 0.8, 0, h * 0.65);
+          ctx.bezierCurveTo(w * 0.65, topCurve * 0.8, w * 0.5, -topCurve * 0.6, 0, topCurve);
+          ctx.closePath();
+        };
+
+        // Outer glow
+        if (isReady || isLoveMode) {
+          ctx.save();
+          ctx.shadowColor = isLoveMode ? '#f43f5e' : '#fbbf24';
+          ctx.shadowBlur = 16;
+          drawHeartPath();
+          ctx.fillStyle = isLoveMode ? 'rgba(244, 63, 94, 0.4)' : 'rgba(251, 191, 36, 0.4)';
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // Heart background track
+        ctx.save();
+        drawHeartPath();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.fill();
+        ctx.strokeStyle = isReady ? '#fbbf24' : '#f43f5e';
+        ctx.lineWidth = isReady ? 2.5 : 1.5;
+        ctx.stroke();
+        ctx.restore();
+
+        // Clipped fill from bottom to top
+        ctx.save();
+        drawHeartPath();
+        ctx.clip();
+
+        const fillH = h * 1.35 * fillPct;
+        const fillY = (h * 0.65) - fillH;
+        const grad = ctx.createLinearGradient(0, h * 0.65, 0, -h * 0.65);
+        if (isLoveMode) {
+          grad.addColorStop(0, '#f59e0b');
+          grad.addColorStop(1, '#f43f5e');
+        } else {
+          grad.addColorStop(0, '#be123c');
+          grad.addColorStop(1, '#fb7185');
+        }
+        ctx.fillStyle = grad;
+        ctx.fillRect(-w, fillY, w * 2, fillH + 20);
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      drawKissCutscene(ctx) {
+        const cx = CONFIG.canvas.width * 0.5;
+        const groundY = CONFIG.canvas.groundY;
+
+        // Romantic pink slowmo atmosphere
+        ctx.save();
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.25)';
+        ctx.fillRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
+
+        // Vignette
+        const vig = ctx.createRadialGradient(cx, groundY - 60, 40, cx, groundY - 60, 420);
+        vig.addColorStop(0, 'rgba(255, 182, 193, 0.25)');
+        vig.addColorStop(1, 'rgba(159, 18, 57, 0.65)');
+        ctx.fillStyle = vig;
+        ctx.fillRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
+
+        // Characters facing each other
+        const heroX = cx - 55;
+        const heroineX = cx + 5;
+
+        // Vicky (Hero)
+        if (this.images.heroRun1 && this.images.heroRun1.complete) {
+          ctx.drawImage(this.images.heroRun1, heroX, groundY - 84, 56, 84);
+          // Rosy cheek blush
+          ctx.fillStyle = 'rgba(244, 63, 94, 0.7)';
+          ctx.beginPath(); ctx.arc(heroX + 38, groundY - 58, 6, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Mrunal (Heroine) facing left
+        if (this.images.heroine && this.images.heroine.complete) {
+          ctx.save();
+          ctx.translate(heroineX + 54, 0);
+          ctx.scale(-1, 1);
+          ctx.drawImage(this.images.heroine, 0, groundY - 80, 54, 80);
+          // Rosy cheek blush
+          ctx.fillStyle = 'rgba(244, 63, 94, 0.7)';
+          ctx.beginPath(); ctx.arc(38, groundY - 54, 6, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+
+        // Cute cartoon beating heart between them
+        const heartBeat = 1.0 + Math.sin(performance.now() * 0.012) * 0.18;
+        ctx.save();
+        ctx.translate(cx, groundY - 95);
+        ctx.scale(heartBeat, heartBeat);
+        ctx.font = '34px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = '#ec4899';
+        ctx.shadowBlur = 18;
+        ctx.fillText('💖', 0, 0);
+        ctx.restore();
+
+        // "MWAH! 💋" sound effect text
+        ctx.save();
+        ctx.font = 'bold 16px "Press Start 2P", monospace';
+        ctx.fillStyle = '#ffe4e6';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = '#be123c';
+        ctx.shadowBlur = 8;
+        ctx.fillText('"MWAH! 💋"', cx, groundY - 130);
+        ctx.restore();
+
+        // 4 COMEDIC RANDOM INTERRUPTIONS:
+        if (this.kissInterruption === 0) {
+          // 1. Crow caws across top
+          const crowX = ((CONFIG.love.kissDuration - this.kissTimer) / CONFIG.love.kissDuration) * (CONFIG.canvas.width + 100) - 50;
+          ctx.save();
+          ctx.font = '28px sans-serif';
+          ctx.fillText('🦅', crowX, 65);
+          ctx.font = 'bold 12px "Press Start 2P", monospace';
+          ctx.fillStyle = '#fde047';
+          ctx.fillText('KAW! KAW! 📢', crowX + 35, 60);
+          // Sweat drop on hero
+          ctx.font = '20px sans-serif';
+          ctx.fillText('💧', heroX + 22, groundY - 90);
+          ctx.restore();
+        } else if (this.kissInterruption === 1) {
+          // 2. Enemy peeks in from right: "Yenna da idhu!!"
+          const eImg = this.images.enemy1;
+          ctx.save();
+          ctx.translate(CONFIG.canvas.width - 70, groundY);
+          if (eImg) ctx.drawImage(eImg, 0, -110, 65, 110);
+          ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.roundRect(-110, -145, 120, 28, 6); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#b91c1c'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('"Yenna da idhu!!"', -50, -127);
+          ctx.restore();
+        } else if (this.kissInterruption === 2) {
+          // 3. Heart pops like a balloon!
+          ctx.save();
+          ctx.font = 'bold 18px "Press Start 2P", monospace';
+          ctx.fillStyle = '#fde047';
+          ctx.textAlign = 'center';
+          ctx.shadowColor = '#000'; ctx.shadowBlur = 6;
+          ctx.fillText('POP! 🎈💥', cx, groundY - 100);
+          ctx.font = '22px sans-serif';
+          ctx.fillText('😵', heroX + 28, groundY - 90);
+          ctx.fillText('😳', heroineX + 27, groundY - 86);
+          ctx.restore();
+        } else if (this.kissInterruption === 3) {
+          // 4. Heroine says "Mudinjucha? Odu da!"
+          ctx.save();
+          ctx.translate(heroineX + 20, groundY - 110);
+          ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ec4899'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.roundRect(-20, -22, 140, 28, 6); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#be123c'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('"Mudinjucha? Odu da! 🏃‍♀️"', 50, -4);
+          ctx.restore();
+        }
+
+        // Banner and tap to skip
+        ctx.save();
+        ctx.font = 'bold 18px "Press Start 2P", monospace';
+        ctx.fillStyle = '#fbbf24';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = '#000'; ctx.shadowBlur = 8;
+        ctx.fillText('💖 KISS MOMENT! 💖', cx, 40);
+        ctx.font = 'bold 9px "Press Start 2P", monospace';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText('(tap anywhere to skip to LOVE MODE)', cx, CONFIG.canvas.height - 20);
+        ctx.restore();
+
+        ctx.restore();
       }
 
       drawHUD() {
@@ -3692,37 +4391,70 @@
 
         // A. Hearts / Lives Display (Top Left)
         ctx.save();
-        ctx.font = '18px sans-serif';
+        ctx.font = '20px sans-serif';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 6;
         for (let i = 0; i < CONFIG.player.maxLives; i++) {
           const heart = i < this.lives ? '❤️' : '🖤';
-          ctx.fillText(heart, 18 + i * 26, 30);
+          ctx.fillText(heart, 18 + i * 28, 30);
         }
 
         // Distance in meters
         ctx.fillStyle = '#94a3b8';
         ctx.font = 'bold 12px "Press Start 2P", monospace';
-        ctx.fillText(`${Math.floor(this.distance)}m`, 18, 54);
+        ctx.fillText(`${Math.floor(this.distance)}m`, 18, 56);
 
         // Combo streak
         if (this.comboStreak >= 3) {
           ctx.fillStyle = '#fbbf24';
           ctx.font = 'bold 10px "Press Start 2P", monospace';
-          ctx.fillText(`STREAK x${this.comboStreak}!`, 18, 74);
+          ctx.fillText(`STREAK x${this.comboStreak}!`, 18, 76);
         }
 
         // B. Active Powerup Icons
         let pOffset = 0;
         if (this.activePowerUps.shield > 0) {
           ctx.fillStyle = '#38bdf8';
-          ctx.fillText(`🛡️ ${Math.ceil(this.activePowerUps.shield)}s`, 18 + pOffset, 96);
+          ctx.fillText(`🛡️ ${Math.ceil(this.activePowerUps.shield)}s`, 18 + pOffset, 98);
           pOffset += 85;
         }
         if (this.activePowerUps.magnet > 0) {
           ctx.fillStyle = '#ef4444';
-          ctx.fillText(`🧲 ${Math.ceil(this.activePowerUps.magnet)}s`, 18 + pOffset, 96);
+          ctx.fillText(`🧲 ${Math.ceil(this.activePowerUps.magnet)}s`, 18 + pOffset, 98);
           pOffset += 85;
         }
         ctx.restore();
+
+        // C. BIG LOVE HEART IN HUD (Top Center) - Only while heroine is with hero
+        if (this.heroine?.active && (this.state === 'RUN_TOGETHER' || this.loveModeTimer > 0)) {
+          const heartCx = CONFIG.canvas.width * 0.5;
+          const heartCy = 26;
+          const fillPct = Math.min(1.0, this.loveMeter / 100);
+
+          this.drawLoveHeart(ctx, heartCx, heartCy, 32, fillPct, this.loveReady, this.loveModeTimer > 0);
+
+          // Status label under heart
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.font = 'bold 9px "Press Start 2P", monospace';
+          if (this.loveModeTimer > 0) {
+            ctx.fillStyle = '#fbbf24';
+            ctx.shadowColor = '#f59e0b'; ctx.shadowBlur = 8;
+            ctx.fillText(`★ LOVE MODE: ${Math.ceil(this.loveModeTimer)}s`, heartCx, 56);
+          } else if (this.loveCooldown > 0) {
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText(`COOLDOWN: ${Math.ceil(this.loveCooldown)}s`, heartCx, 56);
+          } else if (this.loveReady) {
+            ctx.fillStyle = '#fbbf24';
+            ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 10;
+            ctx.fillText(`✨ LOVE READY! (WAITING SAFETY)`, heartCx, 56);
+          } else {
+            ctx.fillStyle = '#fda4af';
+            ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
+            ctx.fillText(`LOVE: ${Math.floor(this.loveMeter)}%`, heartCx, 56);
+          }
+          ctx.restore();
+        }
 
         // C. Danger Meter during ENEMY2_CHASE (Top Center)
         if (this.state === 'ENEMY2_CHASE' && this.enemy2.active) {
