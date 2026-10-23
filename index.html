@@ -1,0 +1,3860 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d1117">
+  <title>Vicky & Mrunal Runner</title>
+  <meta name="description"
+    content="Mobile-first story endless runner starring Vicky, Mrunal, and funny Tamil villains. Complete with voice lines, chase scenes, powerups, and retro sound effects.">
+
+  <!-- Google Fonts for Retro & Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Press+Start+2P&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS STYLING & MOBILE RESPONSIVE SYSTEM
+       ========================================================================== */
+    :root {
+      --bg-dark: #080c14;
+      --panel-bg: rgba(15, 23, 42, 0.88);
+      --panel-border: rgba(255, 255, 255, 0.12);
+      --accent-gold: #f59e0b;
+      --accent-yellow: #fbbf24;
+      --accent-red: #ef4444;
+      --accent-cyan: #06b6d4;
+      --accent-pink: #ec4899;
+      --accent-green: #22c55e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-retro: 'Press Start 2P', monospace;
+      --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: radial-gradient(circle at 50% 20%, #172554 0%, #0b0f19 60%, #030712 100%);
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    /* Outer Wrapper */
+    .game-wrapper {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 8px 12px;
+      margin: auto;
+    }
+
+    /* Top Navigation & Brand Header */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--panel-border);
+      padding: 8px 16px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.6);
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-avatars {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .brand-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-gold);
+      object-fit: cover;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+      background: #1e293b;
+    }
+
+    .brand-avatar.secondary {
+      margin-left: -14px;
+      border-color: var(--accent-pink);
+      box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+    }
+
+    .brand-title h1 {
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #fef08a 50%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+
+    .brand-title p {
+      font-size: 0.7rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    /* Top HUD stats */
+    .hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .score-box {
+      font-family: var(--font-retro);
+      font-size: 0.78rem;
+      letter-spacing: 1.5px;
+      display: flex;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      align-items: center;
+    }
+
+    .hi-score {
+      color: #94a3b8;
+    }
+
+    .current-score {
+      color: var(--accent-yellow);
+      text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+    }
+
+    .current-score.milestone-flash {
+      animation: scoreFlash 0.25s ease infinite alternate;
+    }
+
+    @keyframes scoreFlash {
+      from {
+        color: #fbbf24;
+        transform: scale(1);
+      }
+
+      to {
+        color: #38bdf8;
+        transform: scale(1.08);
+      }
+    }
+
+    .hud-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+      padding: 7px 11px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .btn-icon:active {
+      transform: scale(0.96);
+    }
+
+    /* Main Canvas Viewport */
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 960 / 420;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      background: #000;
+      touch-action: none;
+    }
+
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
+    /* Overlays (Loading, Start, Game Over, Pause) */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+      opacity: 1;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .overlay-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 24px 32px;
+      max-width: 520px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7),
+        0 0 30px rgba(245, 158, 11, 0.15);
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.85);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .overlay-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 0%, #fbbf24 60%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+
+    .game-over-title {
+      background: linear-gradient(135deg, #f87171 0%, #ef4444 60%, #b91c1c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .overlay-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    .punchline-box {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px dashed rgba(239, 68, 68, 0.4);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      color: #fca5a5;
+      font-weight: 600;
+    }
+
+    .stats-card {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-item .label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+
+    .stat-item .val {
+      font-family: var(--font-retro);
+      font-size: 0.95rem;
+      color: var(--accent-yellow);
+    }
+
+    .stat-item .val.hi {
+      color: #38bdf8;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      color: #ffffff;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(234, 88, 12, 0.6);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    /* Progress bar for loading */
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 16px 0 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #f59e0b);
+      border-radius: 6px;
+      transition: width 0.2s ease;
+    }
+
+    /* Daily reward tag */
+    .daily-tag {
+      display: inline-block;
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #4ade80;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    /* Mobile On-Screen Action Controls */
+    .mobile-controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      margin-top: 2px;
+    }
+
+    .mobile-btn {
+      flex: 1;
+      height: 64px;
+      border-radius: 14px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+      touch-action: none;
+      transition: transform 0.1s ease, filter 0.1s ease;
+    }
+
+    .duck-btn {
+      background: linear-gradient(145deg, #1e3a8a, #0369a1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .jump-btn {
+      background: linear-gradient(145deg, #b45309, #d97706);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+    }
+
+    .mobile-btn:active,
+    .mobile-btn.active {
+      transform: scale(0.95);
+      filter: brightness(1.25);
+    }
+
+    /* Desktop Controls Tag Bar */
+    .desktop-hints {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding: 4px 8px;
+    }
+
+    .key-tag-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .key-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    kbd {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Small Screen Adjustments */
+    .attack-btn {
+      background: linear-gradient(145deg, #7c3aed, #a855f7);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      animation: attackPulse 0.6s infinite alternate;
+    }
+
+    @keyframes attackPulse {
+      from {
+        box-shadow: 0 6px 18px rgba(168, 85, 247, 0.4);
+      }
+
+      to {
+        box-shadow: 0 8px 28px rgba(168, 85, 247, 0.8);
+        transform: scale(1.02);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .game-wrapper {
+        padding: 4px 6px;
+        gap: 6px;
+      }
+
+      .brand-title p {
+        display: none;
+      }
+
+      .brand-title h1 {
+        font-size: 0.95rem;
+      }
+
+      .score-box {
+        font-size: 0.68rem;
+        padding: 4px 8px;
+        gap: 6px;
+      }
+
+      .desktop-hints {
+        display: none;
+      }
+
+      .mobile-btn {
+        height: 56px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="game-wrapper">
+    <!-- Header with Avatars and HUD -->
+    <header class="game-header">
+      <div class="brand-badge">
+        <div class="brand-avatars">
+          <img src="hero.png" alt="Hero Vicky" class="brand-avatar" id="heroAvatar"
+            onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'><rect width=\'40\' height=\'40\' fill=\'%23f59e0b\'/><text x=\'20\' y=\'26\' font-size=\'18\' font-weight=\'bold\' fill=\'%23fff\' text-anchor=\'middle\'>V</text></svg>'">
+          <img src="heroin.png" alt="Heroine Mrunal" class="brand-avatar secondary" id="heroineAvatar"
+            onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'><rect width=\'40\' height=\'40\' fill=\'%23ec4899\'/><text x=\'20\' y=\'26\' font-size=\'18\' font-weight=\'bold\' fill=\'%23fff\' text-anchor=\'middle\'>M</text></svg>'">
+        </div>
+        <div class="brand-title">
+          <h1>VICKY & MRUNAL</h1>
+          <p>Tamil Story Runner Edition</p>
+        </div>
+      </div>
+
+      <div class="hud-stats">
+        <div class="score-box">
+          <span class="hi-score" id="hiScoreText">HI 00000</span>
+          <span class="current-score" id="scoreText">00000</span>
+        </div>
+
+        <div class="hud-actions">
+          <button id="muteBtn" class="btn-icon" aria-label="Toggle Sound">🔊 Sound</button>
+          <button id="pauseBtn" class="btn-icon" aria-label="Pause Game">⏸️</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Game Viewport -->
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="gameCanvas"></canvas>
+
+      <!-- Preloader Overlay -->
+      <div class="overlay" id="loadingOverlay">
+        <div class="overlay-card">
+          <h2 class="overlay-title">LOADING RUNNER...</h2>
+          <p class="overlay-subtitle">Preparing sprites, comic sound effects, and desert terrain.</p>
+          <div class="progress-track">
+            <div class="progress-fill" id="loadingProgress"></div>
+          </div>
+          <span id="loadingPct" style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 700;">0%</span>
+        </div>
+      </div>
+
+      <!-- Start Menu Overlay -->
+      <div class="overlay hidden" id="startOverlay">
+        <div class="overlay-card">
+          <span class="daily-tag" id="dailyRewardBadge">🔥 DAY 1 STREAK REWARD ACTIVE</span>
+          <h2 class="overlay-title">DESERT ESCAPE</h2>
+          <p class="overlay-subtitle">
+            Sprint through the Thar dunes, rescue Mrunal, dodge the sneaky ambush of Enemy 1 ("Sir Kolla Varnga!"), and
+            escape the high-speed pursuit!
+          </p>
+          <button id="startPlayBtn" class="btn-primary">
+            <span>▶</span> START STORY SPRINT
+          </button>
+        </div>
+      </div>
+
+      <!-- Pause Menu Overlay -->
+      <div class="overlay hidden" id="pauseOverlay">
+        <div class="overlay-card">
+          <h2 class="overlay-title">SPRINT PAUSED</h2>
+          <p class="overlay-subtitle">Catch your breath! Tap resume or press P when ready to run.</p>
+          <button id="resumeBtn" class="btn-primary">
+            <span>▶</span> RESUME GAME
+          </button>
+        </div>
+      </div>
+
+      <!-- Game Over Overlay with Tanglish Messages -->
+      <div class="overlay hidden" id="gameOverOverlay">
+        <div class="overlay-card">
+          <h2 class="overlay-title game-over-title">GAME OVER</h2>
+          <div class="punchline-box" id="gameOverPunchline">
+            "Sir Kolla Varnga nu sonnen la... Kekkala la?"
+          </div>
+          <div class="stats-card">
+            <div class="stat-item">
+              <span class="label">SCORE</span>
+              <span class="val" id="finalScoreVal">00000</span>
+            </div>
+            <div class="stat-item">
+              <span class="label">DISTANCE</span>
+              <span class="val" id="finalDistanceVal">0m</span>
+            </div>
+            <div class="stat-item">
+              <span class="label">RECORD</span>
+              <span class="val hi" id="finalBestVal">00000</span>
+            </div>
+          </div>
+          <button id="restartBtn" class="btn-primary">
+            <span>🔄</span> PLAY AGAIN (ONE TAP)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Touch Controls -->
+    <div class="mobile-controls">
+      <button id="duckBtn" class="mobile-btn duck-btn" aria-label="Duck">
+        <span>⬇️</span> DUCK / SLIDE
+      </button>
+      <button id="attackBtn" class="mobile-btn attack-btn" aria-label="Attack" style="display:none;">
+        <span>👊</span> ATTACK!
+      </button>
+      <button id="jumpBtn" class="mobile-btn jump-btn" aria-label="Jump">
+        <span>⬆️</span> JUMP (HOLD HIGH)
+      </button>
+    </div>
+
+    <!-- Desktop Keyboard Bar -->
+    <footer class="desktop-hints">
+      <div class="key-tag-group">
+        <div class="key-tag"><kbd>SPACE</kbd> / <kbd>↑</kbd> <span>Jump</span></div>
+        <div class="key-tag"><kbd>↓</kbd> <span>Duck</span></div>
+        <div class="key-tag"><kbd>P</kbd> <span>Pause</span></div>
+        <div class="key-tag"><kbd>M</kbd> <span>Mute</span></div>
+      </div>
+      <div>⚡ Story: Solo → Meet Heroine → Ambush → Chase!</div>
+    </footer>
+  </div>
+
+  <!-- ==========================================================================
+       MODULAR GAME ENGINE (JAVASCRIPT)
+       ========================================================================== */
+       ========================================================================== -->
+  <script>
+    /**
+     * ========================================================================
+     * 1. CONFIG MODULE
+     * All difficulty, physics, distances, and speed tuning in ONE central object.
+     * ========================================================================
+     */
+    const CONFIG = {
+      // Logical Virtual Canvas Resolution (Sharp Hi-DPI via devicePixelRatio)
+      canvas: {
+        width: 960,
+        height: 420,
+        groundY: 340
+      },
+
+      // Physics & Jump
+      physics: {
+        gravity: 1450,               // Pixels / s^2
+        jumpForce: -610,              // Initial jump impulse (pixels / s)
+        jumpHoldGravityMultiplier: 0.42, // Holding jump button lowers gravity for higher float
+        maxJumpHoldTime: 0.28,        // Max seconds variable jump can be extended
+        duckFastFallForce: 850,       // Fast drop force when ducking in midair
+        baseSpeed: 380,               // Initial road scroll speed (pixels / s)
+        maxSpeed: 750,                // Top speed cap
+        speedScalePer100Pts: 18
+      },
+
+      // Story State Distances (in meters)
+      story: {
+        heroineMeetDistance: 25,
+        enemy1AmbushDistance: 999999, // Attacks are now handled frequently & continuously by AttackDirector
+        enemy2ChaseDistance: 999999,
+        cycleLoopDistance: 420
+      },
+
+      // Enemy 2 Pursuit Tuning
+      chase: {
+        initialDanger: 30,
+        dangerPassiveCreep: 1.5,
+        cleanJumpReduction: 4.5,
+        hitSpike: 28,
+        powerUpReduction: 12,
+        chaseDurationMeters: 140
+      },
+
+      // Player Health
+      player: {
+        maxLives: 3,
+        invulnerabilityDuration: 1.5
+      },
+
+      // Power-up durations (in seconds)
+      powerUps: {
+        shieldDuration: 8.0,
+        magnetDuration: 7.0,
+        doubleScoreDuration: 8.0,
+        slowMoDuration: 4.5,
+        spawnIntervalMin: 12,
+        spawnIntervalMax: 20
+      },
+
+      // Attack Director - enemies attack frequently (every 3 to 7 seconds randomly)
+      attack: {
+        minInterval: 3,           // MINIMUM seconds between attacks (3s)
+        maxInterval: 7,           // MAXIMUM seconds between attacks (7s)
+        intervalShrinkPct: 0.02,  // Keep within 3-7s range
+        minGapBetween: 2.0,       // Never schedule within 2s of the last attack
+        telegraphDuration: 0.75,  // Fair reaction window
+        strikeDuration: 0.45,     // Active strike window
+        recoverDuration: 0.65,    // Stumble / dizzy window
+        perfectDodgeWindow: 0.18,
+        perfectSlowMo: 0.45,
+        dodgeComboBonus: 50,
+        doubleAttackAfterCycle: 3
+      },
+
+      // Kidnap / Rescue loop (Triggered by enemy attacks, not cacti)
+      kidnap: {
+        meterReducePerDodge: 10,
+        cutsceneDuration: 2.4,
+        rescueTimeLimit: 45,
+        rescueMaxRetries: 2,
+        rescueScoreBonus: 500,
+        rescueLoveMeter: 50
+      },
+
+      // Rescue Fight mini-game
+      fight: {
+        rounds: 3,
+        recoverWindowBonus: 200
+      },
+
+      // Love & Kiss System
+      love: {
+        fillPerMetersTogether: 20, // +1 per 20m together
+        fillPerCollect: 3,         // +3 on coins/powerups/hearts
+        fillPerPerfectDodge: 5,    // +5 on perfect dodge
+        dropPerHit: 15,            // -15 on hit
+        kissDuration: 3.0,         // 3s cutscene
+        loveModeDuration: 10.0,    // 10s reward
+        cooldownDuration: 30.0,    // 30s cooldown
+        safeDistanceEnemy: 400,    // min distance from enemy for kiss
+        readyMaxWait: 5.0          // max wait in LOVE_READY before force-trigger
+      },
+
+      // Tanglish + Tamil punchlines
+      punchlines: [
+        "Kolla Varnga... Thappichittiye da! ... Aana maatikitiye thalaiva!",
+        "Sir Kolla Varnga nu sonnen la... Kekkala la? Ippo paar!",
+        "Aiyyo Rama! Cactus la poi muttikitaaye pa!",
+        "Speed pathala thambi! Parakkura pakshiya paathu bayandhitiya?",
+        "Heroine-a kaapathama cactus kitta poyitiye... Enna thalaivaa nee?",
+        "Adadada! Orey adi la flat aagitiye pa!",
+        "Danger Meter 100% aayiduchu! Enemy 2 unna thookitaan!",
+        "Nee run pannadhu super thambi, aana enemy speed vera level!",
+        "Thappikave mudiyala! Re-try panni revenge edu!",
+        "Enna kodumai Saravanan idhu! Oru jump kooda thappa potitiye!"
+      ],
+
+      // ASSETS - rename any sprite in ONE line here
+      assets: {
+        heroRun1: 'hero.png',
+        heroRun2: 'hero1.png',
+        heroine: 'heroin.png',
+        enemy1: 'enemy1.png',
+        enemy2: 'ememy2.png'
+      }
+    };
+
+    /**
+     * ========================================================================
+     * 2. ASSET LOADER MODULE
+     * Preloads images with loading percentage & safe canvas fallback placeholders.
+     * ========================================================================
+     */
+    class AssetLoader {
+      constructor() {
+        this.images = {};
+        this.loadedCount = 0;
+        this.totalCount = 0;
+      }
+
+      load(assetManifest, onProgress, onComplete) {
+        const entries = Object.entries(assetManifest);
+        this.totalCount = entries.length;
+
+        if (this.totalCount === 0) {
+          onComplete(this.images);
+          return;
+        }
+
+        entries.forEach(([key, src]) => {
+          const img = new Image();
+          if (src.startsWith('http')) {
+            img.crossOrigin = "anonymous";
+          }
+
+          const finishItem = (resultImg) => {
+            this.images[key] = resultImg;
+            this.loadedCount++;
+            const pct = Math.floor((this.loadedCount / this.totalCount) * 100);
+            if (onProgress) onProgress(pct);
+            if (this.loadedCount >= this.totalCount && onComplete) {
+              onComplete(this.images);
+            }
+          };
+
+          img.onload = () => finishItem(img);
+
+          img.onerror = () => {
+            // Try common alternative filename
+            let altSrc = null;
+            if (src === 'heroin.png') altSrc = 'heroine.png';
+            else if (src === 'heroine.png') altSrc = 'heroin.png';
+            else if (src === 'ememy2.png') altSrc = 'enemy2.png';
+            else if (src === 'enemy2.png') altSrc = 'ememy2.png';
+
+            if (altSrc) {
+              const retry = new Image();
+              retry.onload = () => finishItem(retry);
+              retry.onerror = () => finishItem(this.createPlaceholder(key));
+              retry.src = altSrc;
+            } else {
+              finishItem(this.createPlaceholder(key));
+            }
+          };
+
+          img.src = src;
+        });
+      }
+
+      createPlaceholder(name) {
+        const c = document.createElement('canvas');
+        c.width = 120;
+        c.height = 140;
+        const ctx = c.getContext('2d');
+        const color = name.includes('heroine') ? '#ec4899' :
+          name.includes('enemy') ? '#ef4444' : '#f59e0b';
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.roundRect(6, 6, 108, 128, 16);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(name.slice(0, 7), 60, 70);
+        return c;
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 3. AUDIO MANAGER MODULE (Web Audio API - 100% Zero External Files)
+     * Rich cartoon sounds, funny jingles, danger heartbeats & speech synthesis.
+     * ========================================================================
+     */
+    class AudioManager {
+      constructor() {
+        this.ctx = null;
+        this.muted = localStorage.getItem('vicky_runner_muted') === 'true';
+        this.speechAvailable = ('speechSynthesis' in window);
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        localStorage.setItem('vicky_runner_muted', this.muted);
+        return this.muted;
+      }
+
+      playJump() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.14);
+
+          gain.gain.setValueAtTime(0.24, now);
+          gain.gain.exponentialRampToValueAtTime(0.005, now + 0.16);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.17);
+        } catch (e) { }
+      }
+
+      playDuck() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.11);
+
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.11);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } catch (e) { }
+      }
+
+      playCoin() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          [1318.5, 1661.2].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+
+            gain.gain.setValueAtTime(0.18, now + idx * 0.06);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + idx * 0.06 + 0.14);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.06);
+            osc.stop(now + idx * 0.06 + 0.15);
+          });
+        } catch (e) { }
+      }
+
+      playHeroineMeet() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          // Sweet romantic harp arpeggio: C5, E5, G5, B5, C6
+          const notes = [523.25, 659.25, 783.99, 987.77, 1046.5];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+            gain.gain.setValueAtTime(0.2, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + idx * 0.08 + 0.35);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.36);
+          });
+        } catch (e) { }
+      }
+
+      playEnemySting() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          // Dissonant dramatic villain chord
+          [146.83, 174.61, 207.65, 311.13].forEach((freq) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, now);
+
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.46);
+          });
+        } catch (e) { }
+      }
+
+      playEnemyAttack() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(70, now + 0.22);
+
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.26);
+        } catch (e) { }
+      }
+
+      playEscapeSuccess() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          // Victory fanfare
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+
+            gain.gain.setValueAtTime(0.14, now + idx * 0.09);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + idx * 0.09 + 0.25);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.09);
+            osc.stop(now + idx * 0.09 + 0.26);
+          });
+        } catch (e) { }
+      }
+
+      playHit() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.exponentialRampToValueAtTime(40, now + 0.28);
+
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } catch (e) { }
+      }
+
+      playPowerUp() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const notes = [330, 392, 493.88, 587.33, 659.25, 783.99];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+
+            gain.gain.setValueAtTime(0.16, now + idx * 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + idx * 0.05 + 0.12);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.05);
+            osc.stop(now + idx * 0.05 + 0.13);
+          });
+        } catch (e) { }
+      }
+
+      playSadTrombone() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          // Classic funny sad trombone: D4 -> C#4 -> C4 -> B3 (falling glissando)
+          const notes = [
+            { f: 293.66, dur: 0.25 },
+            { f: 277.18, dur: 0.25 },
+            { f: 261.63, dur: 0.25 },
+            { f: 246.94, dur: 0.6 }
+          ];
+          let time = now;
+          notes.forEach((n, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+
+            osc.frequency.setValueAtTime(n.f, time);
+            if (idx === 3) {
+              osc.frequency.linearRampToValueAtTime(n.f * 0.78, time + n.dur);
+            }
+
+            gain.gain.setValueAtTime(0.2, time);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + n.dur);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(time);
+            osc.stop(time + n.dur + 0.02);
+            time += n.dur;
+          });
+        } catch (e) { }
+      }
+
+      playHeartbeatPulse(dangerPct) {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(55, now);
+          osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
+
+          const vol = Math.min(0.35, 0.12 + (dangerPct / 100) * 0.2);
+          gain.gain.setValueAtTime(vol, now);
+          gain.gain.exponentialRampToValueAtTime(0.005, now + 0.14);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } catch (e) { }
+      }
+
+      speakEnemyQuote() {
+        if (!this.speechAvailable || this.muted) return;
+        try {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance("Sir Kolla Varnga!");
+          utterance.rate = 1.2;
+          utterance.pitch = 1.35;
+          utterance.volume = 1.0;
+          window.speechSynthesis.speak(utterance);
+        } catch (e) { }
+      }
+
+      playAttackWarning() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          [220, 277.18, 220].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, now + i * 0.12);
+            g.gain.setValueAtTime(0.18, now + i * 0.12);
+            g.gain.exponentialRampToValueAtTime(0.005, now + i * 0.12 + 0.1);
+            osc.connect(g); g.connect(this.ctx.destination);
+            osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.11);
+          });
+        } catch (e) { }
+      }
+
+      playPerfectDodge() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          [659.25, 880, 1318.5].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.07);
+            g.gain.setValueAtTime(0.22, now + i * 0.07);
+            g.gain.exponentialRampToValueAtTime(0.005, now + i * 0.07 + 0.2);
+            osc.connect(g); g.connect(this.ctx.destination);
+            osc.start(now + i * 0.07); osc.stop(now + i * 0.07 + 0.21);
+          });
+        } catch (e) { }
+      }
+
+      playKidnapScream() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(900, now + 0.15);
+          osc.frequency.exponentialRampToValueAtTime(400, now + 0.5);
+          g.gain.setValueAtTime(0.28, now);
+          g.gain.exponentialRampToValueAtTime(0.005, now + 0.55);
+          osc.connect(g); g.connect(this.ctx.destination);
+          osc.start(now); osc.stop(now + 0.56);
+        } catch (e) { }
+        try {
+          window.speechSynthesis?.cancel();
+          const u = new SpeechSynthesisUtterance("Aiyoo! Kaapathunga!");
+          u.rate = 1.3; u.pitch = 1.8; u.volume = 0.9;
+          window.speechSynthesis?.speak(u);
+        } catch (e) { }
+      }
+
+      playRescueSuccess() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+          notes.forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.08);
+            g.gain.setValueAtTime(0.22, now + i * 0.08);
+            g.gain.exponentialRampToValueAtTime(0.005, now + i * 0.08 + 0.3);
+            osc.connect(g); g.connect(this.ctx.destination);
+            osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.31);
+          });
+        } catch (e) { }
+      }
+
+      playFightHit() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.18);
+          g.gain.setValueAtTime(0.3, now);
+          g.gain.exponentialRampToValueAtTime(0.005, now + 0.2);
+          osc.connect(g); g.connect(this.ctx.destination);
+          osc.start(now); osc.stop(now + 0.21);
+        } catch (e) { }
+      }
+
+      // Cute Cartoon Kiss ("Mwah!") Sound
+      playKissMwah() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          // Soft suction pop
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.25);
+          g.gain.setValueAtTime(0.01, now);
+          g.gain.exponentialRampToValueAtTime(0.35, now + 0.08);
+          g.gain.exponentialRampToValueAtTime(0.005, now + 0.28);
+          osc.connect(g); g.connect(this.ctx.destination);
+          osc.start(now); osc.stop(now + 0.29);
+
+          // Sparkle pop
+          const osc2 = this.ctx.createOscillator();
+          const g2 = this.ctx.createGain();
+          osc2.type = 'triangle';
+          osc2.frequency.setValueAtTime(1046.5, now + 0.1);
+          osc2.frequency.exponentialRampToValueAtTime(1318.5, now + 0.25);
+          g2.gain.setValueAtTime(0.2, now + 0.1);
+          g2.gain.exponentialRampToValueAtTime(0.005, now + 0.32);
+          osc2.connect(g2); g2.connect(this.ctx.destination);
+          osc2.start(now + 0.1); osc2.stop(now + 0.33);
+        } catch (e) { }
+      }
+
+      // Upbeat Love Mode Theme Jingle
+      playLoveModeTheme() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const chords = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98];
+          chords.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+            g.gain.setValueAtTime(0.2, now + idx * 0.06);
+            g.gain.exponentialRampToValueAtTime(0.005, now + idx * 0.06 + 0.35);
+            osc.connect(g); g.connect(this.ctx.destination);
+            osc.start(now + idx * 0.06); osc.stop(now + idx * 0.06 + 0.36);
+          });
+        } catch (e) { }
+      }
+
+      // Comedic Crow Caw ("KAW! KAW!")
+      playCrowCaw() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          [0, 0.16].forEach(delay => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(420, now + delay);
+            osc.frequency.linearRampToValueAtTime(260, now + delay + 0.12);
+            g.gain.setValueAtTime(0.28, now + delay);
+            g.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.14);
+            osc.connect(g); g.connect(this.ctx.destination);
+            osc.start(now + delay); osc.stop(now + delay + 0.15);
+          });
+        } catch (e) { }
+      }
+
+      // Cartoon Balloon Pop
+      playBalloonPop() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(60, now + 0.1);
+          g.gain.setValueAtTime(0.4, now);
+          g.gain.exponentialRampToValueAtTime(0.005, now + 0.11);
+          osc.connect(g); g.connect(this.ctx.destination);
+          osc.start(now); osc.stop(now + 0.12);
+        } catch (e) { }
+      }
+
+      // Romantic Milestone Jingle
+      playMilestoneJingle() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const notes = [440, 554.37, 659.25, 880, 1108.73];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            g.gain.setValueAtTime(0.2, now + idx * 0.07);
+            g.gain.exponentialRampToValueAtTime(0.005, now + idx * 0.07 + 0.38);
+            osc.connect(g); g.connect(this.ctx.destination);
+            osc.start(now + idx * 0.07); osc.stop(now + idx * 0.07 + 0.39);
+          });
+        } catch (e) { }
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 4. INPUT MANAGER MODULE
+     * Touch, multi-touch, holding variable jumps, swipe down, and desktop keys.
+     * ========================================================================
+     */
+    class InputManager {
+      constructor(onJumpStart, onJumpEnd, onDuckStart, onDuckEnd, onAction, onTogglePause) {
+        this.onJumpStart = onJumpStart;
+        this.onJumpEnd = onJumpEnd;
+        this.onDuckStart = onDuckStart;
+        this.onDuckEnd = onDuckEnd;
+        this.onAction = onAction;
+        this.onTogglePause = onTogglePause;
+
+        this.isJumpPressed = false;
+        this.isDuckPressed = false;
+        this.touchStartY = 0;
+
+        this.bindEvents();
+      }
+
+      bindEvents() {
+        // Desktop Keyboard
+        window.addEventListener('keydown', (e) => {
+          if (e.repeat) return;
+          if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+            e.preventDefault();
+            this.isJumpPressed = true;
+            this.onJumpStart();
+            this.onAction();
+          } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+            e.preventDefault();
+            this.isDuckPressed = true;
+            this.onDuckStart();
+          } else if (e.code === 'KeyP') {
+            this.onTogglePause();
+          } else if (e.code === 'KeyM') {
+            document.getElementById('muteBtn')?.click();
+          }
+        });
+
+        window.addEventListener('keyup', (e) => {
+          if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+            this.isJumpPressed = false;
+            this.onJumpEnd();
+          } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+            this.isDuckPressed = false;
+            this.onDuckEnd();
+          }
+        });
+
+        // Mobile Buttons
+        const jumpBtn = document.getElementById('jumpBtn');
+        const duckBtn = document.getElementById('duckBtn');
+
+        if (jumpBtn) {
+          const startJump = (e) => {
+            e.preventDefault();
+            jumpBtn.classList.add('active');
+            this.isJumpPressed = true;
+            this.onJumpStart();
+            this.onAction();
+          };
+          const stopJump = (e) => {
+            e.preventDefault();
+            jumpBtn.classList.remove('active');
+            this.isJumpPressed = false;
+            this.onJumpEnd();
+          };
+          jumpBtn.addEventListener('pointerdown', startJump);
+          jumpBtn.addEventListener('pointerup', stopJump);
+          jumpBtn.addEventListener('pointercancel', stopJump);
+        }
+
+        if (duckBtn) {
+          const startDuck = (e) => {
+            e.preventDefault();
+            duckBtn.classList.add('active');
+            this.isDuckPressed = true;
+            this.onDuckStart();
+          };
+          const stopDuck = (e) => {
+            e.preventDefault();
+            duckBtn.classList.remove('active');
+            this.isDuckPressed = false;
+            this.onDuckEnd();
+          };
+          duckBtn.addEventListener('pointerdown', startDuck);
+          duckBtn.addEventListener('pointerup', stopDuck);
+          duckBtn.addEventListener('pointercancel', stopDuck);
+        }
+
+        // Canvas Direct Touch & Swipe Support
+        const canvas = document.getElementById('gameCanvas');
+        canvas.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          const touch = e.touches[0];
+          this.touchStartY = touch.clientY;
+          this.isJumpPressed = true;
+          this.onJumpStart();
+          this.onAction();
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+          e.preventDefault();
+          const touch = e.touches[0];
+          const deltaY = touch.clientY - this.touchStartY;
+          if (deltaY > 28 && !this.isDuckPressed) {
+            // Swiped down -> duck
+            this.isDuckPressed = true;
+            this.onDuckStart();
+          }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          this.isJumpPressed = false;
+          this.onJumpEnd();
+          if (this.isDuckPressed) {
+            this.isDuckPressed = false;
+            this.onDuckEnd();
+          }
+        }, { passive: false });
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 5. PARTICLE SYSTEM MODULE (Object Pool - Zero Per-Frame GC Allocations)
+     * Dust clouds, jump sparks, golden coin bursts, love hearts & confetti.
+     * ========================================================================
+     */
+    class Particle {
+      constructor() {
+        this.active = false;
+        this.x = 0;
+        this.y = 0;
+        this.vx = 0;
+        this.vy = 0;
+        this.size = 3;
+        this.color = '#fff';
+        this.type = 'circle'; // 'circle', 'heart', 'star', 'confetti'
+        this.life = 1;
+        this.maxLife = 1;
+        this.rotation = 0;
+        this.vRot = 0;
+      }
+
+      spawn(x, y, vx, vy, size, color, life, type = 'circle') {
+        this.active = true;
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.size = size;
+        this.color = color;
+        this.life = life;
+        this.maxLife = life;
+        this.type = type;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.vRot = (Math.random() - 0.5) * 6;
+      }
+
+      update(dt) {
+        if (!this.active) return;
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+        this.rotation += this.vRot * dt;
+        this.life -= dt;
+        if (this.life <= 0) {
+          this.active = false;
+        }
+      }
+
+      draw(ctx) {
+        if (!this.active) return;
+        const alpha = Math.max(0, this.life / this.maxLife);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+
+        if (this.type === 'heart') {
+          ctx.fillStyle = this.color;
+          const s = this.size * 0.7;
+          ctx.beginPath();
+          ctx.moveTo(0, s * 0.3);
+          ctx.bezierCurveTo(-s, -s * 0.6, -s * 1.2, s * 0.4, 0, s * 1.2);
+          ctx.bezierCurveTo(s * 1.2, s * 0.4, s, -s * 0.6, 0, s * 0.3);
+          ctx.fill();
+        } else if (this.type === 'star') {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const a1 = i * Math.PI * 0.4;
+            const a2 = a1 + Math.PI * 0.2;
+            ctx.lineTo(Math.cos(a1) * this.size, Math.sin(a1) * this.size);
+            ctx.lineTo(Math.cos(a2) * (this.size * 0.45), Math.sin(a2) * (this.size * 0.45));
+          }
+          ctx.closePath();
+          ctx.fill();
+        } else if (this.type === 'confetti') {
+          ctx.fillStyle = this.color;
+          ctx.fillRect(-this.size, -this.size * 0.5, this.size * 2, this.size);
+        } else {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(0, 0, Math.max(1, this.size * alpha), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    class ParticlePool {
+      constructor(capacity = 250) {
+        this.pool = Array.from({ length: capacity }, () => new Particle());
+      }
+
+      emit(x, y, vx, vy, size, color, life, type = 'circle') {
+        const p = this.pool.find(item => !item.active);
+        if (p) p.spawn(x, y, vx, vy, size, color, life, type);
+      }
+
+      emitBurst(x, y, count, color, speed = 120, type = 'circle') {
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const spd = (0.3 + Math.random() * 0.7) * speed;
+          this.emit(
+            x, y,
+            Math.cos(angle) * spd,
+            Math.sin(angle) * spd,
+            Math.random() * 5 + 3,
+            color,
+            0.4 + Math.random() * 0.5,
+            type
+          );
+        }
+      }
+
+      update(dt) {
+        for (let i = 0; i < this.pool.length; i++) {
+          if (this.pool[i].active) this.pool[i].update(dt);
+        }
+      }
+
+      draw(ctx) {
+        for (let i = 0; i < this.pool.length; i++) {
+          if (this.pool[i].active) this.pool[i].draw(ctx);
+        }
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 6. BACKGROUND & ENVIRONMENT MODULE
+     * Parallax desert dunes, day/night cycles, moving sun/moon & weather stars.
+     * ========================================================================
+     */
+    class Background {
+      constructor(width, height, groundY) {
+        this.width = width;
+        this.height = height;
+        this.groundY = groundY;
+
+        this.clouds = [
+          { x: 120, y: 55, scale: 1.0, speed: 20 },
+          { x: 420, y: 80, scale: 0.8, speed: 15 },
+          { x: 700, y: 45, scale: 1.2, speed: 25 },
+          { x: 960, y: 70, scale: 0.9, speed: 18 }
+        ];
+
+        this.dunesOffset = 0;
+        this.groundOffset = 0;
+
+        // Night stars
+        this.stars = Array.from({ length: 40 }, () => ({
+          x: Math.random() * width,
+          y: Math.random() * (groundY - 110),
+          size: Math.random() * 2 + 0.8,
+          twinkle: Math.random() * Math.PI * 2
+        }));
+      }
+
+      update(dt, speed, score) {
+        // Day / Night cycle progression based on score
+        const cycle = score % 1200;
+        if (cycle < 500) {
+          this.nightAlpha = 0; // Day
+        } else if (cycle < 650) {
+          this.nightAlpha = (cycle - 500) / 150; // Sunset
+        } else if (cycle < 1050) {
+          this.nightAlpha = 1; // Night
+        } else {
+          this.nightAlpha = 1 - (cycle - 1050) / 150; // Sunrise
+        }
+
+        // Parallax scrolling
+        this.dunesOffset = (this.dunesOffset - speed * 0.18 * dt) % 360;
+        this.groundOffset = (this.groundOffset - speed * dt) % 40;
+
+        // Clouds
+        this.clouds.forEach(c => {
+          c.x -= c.speed * dt;
+          if (c.x < -120) {
+            c.x = this.width + 60;
+            c.y = 35 + Math.random() * 60;
+          }
+        });
+
+        // Stars twinkle
+        this.stars.forEach(s => s.twinkle += dt * 3);
+      }
+
+      draw(ctx) {
+        // 1. Sky Gradient
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, this.groundY);
+        if (this.nightAlpha > 0) {
+          skyGrad.addColorStop(0, '#0a0e1a');
+          skyGrad.addColorStop(0.7, '#111827');
+          skyGrad.addColorStop(1, '#1e293b');
+        } else {
+          skyGrad.addColorStop(0, '#e0f2fe');
+          skyGrad.addColorStop(0.65, '#f8fafc');
+          skyGrad.addColorStop(1, '#fef3c7');
+        }
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        // 2. Stars & Moon (Night) or Glowing Sun (Day)
+        if (this.nightAlpha > 0) {
+          ctx.save();
+          ctx.globalAlpha = this.nightAlpha;
+          this.stars.forEach(s => {
+            const glow = 0.3 + 0.7 * Math.sin(s.twinkle);
+            ctx.fillStyle = `rgba(255, 255, 255, ${glow})`;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // Glowing Moon
+          ctx.fillStyle = '#f8fafc';
+          ctx.shadowColor = '#e2e8f0';
+          ctx.shadowBlur = 18;
+          ctx.beginPath();
+          ctx.arc(820, 70, 24, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#cbd5e1';
+          ctx.beginPath();
+          ctx.arc(814, 66, 4, 0, Math.PI * 2);
+          ctx.arc(828, 76, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else {
+          // Radiant Sun
+          ctx.save();
+          ctx.fillStyle = '#fbbf24';
+          ctx.shadowColor = 'rgba(251, 191, 36, 0.45)';
+          ctx.shadowBlur = 24;
+          ctx.beginPath();
+          ctx.arc(820, 70, 22, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 3. Parallax Distant Dunes
+        ctx.save();
+        ctx.fillStyle = this.nightAlpha > 0 ? '#1e293b' : '#fed7aa';
+        for (let x = this.dunesOffset - 360; x < this.width + 360; x += 180) {
+          ctx.beginPath();
+          ctx.moveTo(x, this.groundY);
+          ctx.quadraticCurveTo(x + 90, this.groundY - 50, x + 180, this.groundY);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // 4. Parallax Clouds
+        this.clouds.forEach(c => {
+          ctx.save();
+          ctx.translate(c.x, c.y);
+          ctx.scale(c.scale, c.scale);
+          ctx.fillStyle = this.nightAlpha > 0 ? 'rgba(51, 65, 85, 0.55)' : 'rgba(255, 255, 255, 0.85)';
+          ctx.beginPath();
+          ctx.arc(20, 20, 16, 0, Math.PI * 2);
+          ctx.arc(42, 16, 20, 0, Math.PI * 2);
+          ctx.arc(64, 20, 15, 0, Math.PI * 2);
+          ctx.arc(52, 26, 14, 0, Math.PI * 2);
+          ctx.arc(30, 26, 14, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // 5. Ground Line & Texture
+        ctx.save();
+        ctx.strokeStyle = this.nightAlpha > 0 ? '#475569' : '#ca8a04';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, this.groundY);
+        ctx.lineTo(this.width, this.groundY);
+        ctx.stroke();
+
+        // Road gravel / dashes
+        ctx.strokeStyle = this.nightAlpha > 0 ? '#334155' : '#eab308';
+        ctx.lineWidth = 2;
+        for (let x = this.groundOffset; x < this.width; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, this.groundY + 3);
+          ctx.lineTo(x + 18, this.groundY + 3);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 7. HERO CLASS (Vicky - Alternates hero.png and hero1.png)
+     * Full running physics, variable jump height, ducking and shield effects.
+     * ========================================================================
+     */
+    class Hero {
+      constructor(groundY, images) {
+        this.groundY = groundY;
+        this.images = images;
+
+        this.x = 90;
+        this.y = groundY;
+        this.vy = 0;
+
+        this.standWidth = 56;
+        this.standHeight = 84;
+        this.duckWidth = 72;
+        this.duckHeight = 50;
+
+        this.width = this.standWidth;
+        this.height = this.standHeight;
+
+        this.isGrounded = true;
+        this.isDucking = false;
+        this.jumpHoldTimer = 0;
+        this.isJumpHeld = false;
+
+        this.runCycle = 0;
+        this.invulnerableTimer = 0;
+      }
+
+      reset() {
+        this.x = 90;
+        this.y = this.groundY;
+        this.vy = 0;
+        this.isGrounded = true;
+        this.isDucking = false;
+        this.jumpHoldTimer = 0;
+        this.isJumpHeld = false;
+        this.width = this.standWidth;
+        this.height = this.standHeight;
+        this.invulnerableTimer = 0;
+      }
+
+      jumpStart() {
+        if (this.isGrounded) {
+          this.vy = CONFIG.physics.jumpForce;
+          this.isGrounded = false;
+          this.isJumpHeld = true;
+          this.jumpHoldTimer = CONFIG.physics.maxJumpHoldTime;
+          return true;
+        }
+        return false;
+      }
+
+      jumpEnd() {
+        this.isJumpHeld = false;
+      }
+
+      setDuck(ducking) {
+        this.isDucking = ducking;
+        if (ducking) {
+          this.width = this.duckWidth;
+          this.height = this.duckHeight;
+          if (!this.isGrounded) {
+            // Fast fall
+            this.vy += CONFIG.physics.duckFastFallForce * 0.016;
+          }
+        } else {
+          this.width = this.standWidth;
+          this.height = this.standHeight;
+        }
+      }
+
+      update(dt, speed, particlePool) {
+        if (this.invulnerableTimer > 0) {
+          this.invulnerableTimer -= dt;
+        }
+
+        // Variable Jump Holding Physics
+        let effectiveGravity = CONFIG.physics.gravity;
+        if (this.isJumpHeld && this.jumpHoldTimer > 0 && this.vy < 0) {
+          effectiveGravity *= CONFIG.physics.jumpHoldGravityMultiplier;
+          this.jumpHoldTimer -= dt;
+        }
+
+        this.y += this.vy * dt;
+
+        if (!this.isGrounded) {
+          this.vy += effectiveGravity * dt;
+          if (this.y >= this.groundY) {
+            this.y = this.groundY;
+            this.vy = 0;
+            this.isGrounded = true;
+
+            // Landing dust
+            particlePool.emitBurst(this.x + 20, this.groundY, 6, '#d1d5db', 80);
+          }
+        } else {
+          // Running cycle progression
+          this.runCycle += speed * dt * 0.018;
+
+          // Running footstep dust
+          if (Math.random() < 0.25) {
+            particlePool.emit(
+              this.x + 5,
+              this.groundY - 2,
+              -speed * 0.35,
+              -Math.random() * 30 - 10,
+              Math.random() * 3 + 2,
+              'rgba(215, 195, 165, 0.7)',
+              0.3
+            );
+          }
+        }
+      }
+
+      getHitbox() {
+        const padX = 8;
+        const padY = 6;
+        return {
+          x: this.x + padX,
+          y: this.y - this.height + padY,
+          width: this.width - padX * 2,
+          height: this.height - padY * 2
+        };
+      }
+
+      draw(ctx, hasShield) {
+        // Invulnerability flicker
+        if (this.invulnerableTimer > 0 && Math.floor(this.invulnerableTimer * 12) % 2 === 0) {
+          return;
+        }
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        // Frame selection: alternate hero.png and hero1.png based on run cycle
+        const useFrame2 = !this.isGrounded || (Math.floor(this.runCycle) % 2 === 1);
+        const heroImg = useFrame2 ? this.images.heroRun2 : this.images.heroRun1;
+
+        if (this.isDucking) {
+          // Sliding pose
+          ctx.save();
+          ctx.translate(0, -this.duckHeight * 0.6);
+          ctx.rotate(0.28);
+          ctx.drawImage(heroImg, 0, -this.duckHeight, this.duckWidth, this.duckHeight * 1.3);
+          ctx.restore();
+        } else {
+          // Standing / Jumping
+          const bob = this.isGrounded ? Math.sin(this.runCycle * Math.PI) * 2.5 : -2;
+          ctx.drawImage(heroImg, 0, -this.standHeight + bob, this.standWidth, this.standHeight);
+        }
+
+        // Active Shield Visual Aura
+        if (hasShield) {
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 3;
+          ctx.shadowColor = '#0284c7';
+          ctx.shadowBlur = 14;
+          ctx.beginPath();
+          ctx.ellipse(this.width * 0.5, -this.height * 0.5, this.width * 0.65, this.height * 0.6, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 8. HEROINE CLASS (Mrunal - heroin.png)
+     * Meets hero, runs beside him, copies jumps with smooth follower delay.
+     * ========================================================================
+     */
+    class Heroine {
+      constructor(groundY, image) {
+        this.groundY = groundY;
+        this.image = image;
+
+        this.x = 42;
+        this.y = groundY;
+        this.vy = 0;
+        this.width = 54;
+        this.height = 80;
+        this.active = false;
+        this.runCycle = 0;
+      }
+
+      reset() {
+        this.x = 42;
+        this.y = this.groundY;
+        this.vy = 0;
+        this.active = false;
+        this.runCycle = 0;
+      }
+
+      update(dt, speed, hero, particlePool) {
+        if (!this.active) return;
+
+        // Position slightly behind or alongside hero
+        this.x = hero.x - 44;
+
+        // Smooth follower lag for vertical jump
+        this.y += (hero.y - this.y) * 14 * dt;
+        this.runCycle += speed * dt * 0.018;
+
+        // Floating love hearts occasionally
+        if (Math.random() < 0.05) {
+          particlePool.emit(
+            this.x + 20,
+            this.y - 65,
+            (Math.random() - 0.5) * 30,
+            -Math.random() * 40 - 20,
+            8,
+            '#f43f5e',
+            0.6,
+            'heart'
+          );
+        }
+      }
+
+      draw(ctx, isDucking) {
+        if (!this.active) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        if (isDucking) {
+          ctx.save();
+          ctx.translate(0, -this.height * 0.4);
+          ctx.rotate(0.2);
+          ctx.drawImage(this.image, 0, -this.height * 0.65, this.width * 1.1, this.height * 0.7);
+          ctx.restore();
+        } else {
+          const bob = Math.sin(this.runCycle * Math.PI + 0.4) * 2;
+          ctx.drawImage(this.image, 0, -this.height + bob, this.width, this.height);
+        }
+        ctx.restore();
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 9. ENEMY 1 CLASS (Ambush Villain - enemy1.png)
+     * Stationary road ambush, speech bubble "Sir Kolla Varnga !", and strike.
+     * ========================================================================
+     */
+    class Enemy1 {
+      constructor(groundY, image) {
+        this.groundY = groundY;
+        this.image = image;
+
+        this.x = 0;
+        this.y = groundY;
+        this.width = 65;
+        this.height = 110;
+        this.active = false;
+        this.spoken = false;
+        this.timer = 0;
+        this.attackProgress = 0;
+        this.escaped = false;
+        this.requiredAction = 'JUMP';
+      }
+
+      spawn(roadX) {
+        this.x = roadX;
+        this.y = this.groundY;
+        this.active = true;
+        this.spoken = false;
+        this.timer = 0;
+        this.attackProgress = 0;
+        this.escaped = false;
+        this.requiredAction = Math.random() < 0.5 ? 'JUMP' : 'DUCK';
+      }
+
+      update(dt, speed) {
+        if (!this.active) return;
+        this.timer += dt;
+        if (this.attackProgress > 0 && this.attackProgress < 1) {
+          this.attackProgress += dt * 2.2;
+        }
+      }
+
+      draw(ctx) {
+        if (!this.active) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        // Windup or lunge offset
+        const lungeX = this.attackProgress > 0 ? -Math.sin(this.attackProgress * Math.PI) * 35 : 0;
+        ctx.drawImage(this.image, lungeX, -this.height, this.width, this.height);
+
+        // Comic Speech Bubble: "Sir Kolla Varnga !"
+        ctx.save();
+        ctx.translate(lungeX - 15, -this.height - 35);
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(-70, -18, 140, 32, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        // Bubble pointer
+        ctx.beginPath();
+        ctx.moveTo(10, 14);
+        ctx.lineTo(20, 24);
+        ctx.lineTo(0, 14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Speech text
+        ctx.fillStyle = '#b91c1c';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText("Sir Kolla Varnga !", 0, -2);
+        ctx.restore();
+
+        // Quick Dodge Prompt Banner
+        if (this.attackProgress > 0 && this.attackProgress < 0.8 && !this.escaped) {
+          ctx.save();
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 14px "Press Start 2P", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${this.requiredAction} TO DODGE!`, lungeX + 30, -this.height - 55);
+          ctx.restore();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 10. ENEMY 2 CLASS (Chase Villain - ememy2.png)
+     * High-speed pursuit from left, dynamic danger meter, and heartbeat tempo.
+     * ========================================================================
+     */
+    class Enemy2 {
+      constructor(groundY, image) {
+        this.groundY = groundY;
+        this.image = image;
+
+        this.x = -120;
+        this.y = groundY;
+        this.width = 68;
+        this.height = 96;
+        this.active = false;
+        this.danger = CONFIG.chase.initialDanger;
+        this.runCycle = 0;
+      }
+
+      startChase() {
+        this.active = true;
+        this.danger = CONFIG.chase.initialDanger;
+        this.x = -80;
+      }
+
+      endChase() {
+        this.active = false;
+      }
+
+      update(dt, heroX) {
+        if (!this.active) return;
+        this.runCycle += dt * 14;
+
+        // Danger slowly creeps up
+        this.danger = Math.min(100, this.danger + CONFIG.chase.dangerPassiveCreep * dt);
+
+        // Position on canvas is tied directly to danger meter (0% = off screen, 100% = caught hero)
+        const targetX = (this.danger / 100) * (heroX - 30) - 20;
+        this.x += (targetX - this.x) * 4 * dt;
+      }
+
+      draw(ctx) {
+        if (!this.active) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        const bob = Math.sin(this.runCycle) * 3;
+        ctx.drawImage(this.image, 0, -this.height + bob, this.width, this.height);
+
+        // Comic angry steam puffs over head
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.7)';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText("💢", 20, -this.height - 8);
+
+        ctx.restore();
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 11. OBSTACLE & POWERUP MANAGERS
+     * Cacti, flying desert hawks, gold coins, shields, and magnets.
+     * ========================================================================
+     */
+    class Obstacle {
+      constructor(x, groundY, type) {
+        this.x = x;
+        this.groundY = groundY;
+        this.type = type; // 'cactus_s', 'cactus_d', 'bird_low', 'bird_high'
+        this.passed = false;
+        this.wingTimer = 0;
+
+        if (type === 'cactus_s') {
+          this.width = 24;
+          this.height = 46;
+          this.y = groundY - this.height;
+        } else if (type === 'cactus_d') {
+          this.width = 46;
+          this.height = 54;
+          this.y = groundY - this.height;
+        } else if (type === 'bird_low') {
+          this.width = 44;
+          this.height = 32;
+          this.y = groundY - 48; // Must jump or duck
+        } else { // bird_high
+          this.width = 44;
+          this.height = 32;
+          this.y = groundY - 78; // Must duck under
+        }
+      }
+
+      update(dt, speed) {
+        this.x -= speed * dt;
+        if (this.type.startsWith('bird')) {
+          this.wingTimer += dt * 10;
+        }
+      }
+
+      getHitbox() {
+        const pad = 5;
+        return {
+          x: this.x + pad,
+          y: this.y + pad,
+          width: this.width - pad * 2,
+          height: this.height - pad * 2
+        };
+      }
+
+      draw(ctx, isNight) {
+        ctx.save();
+        if (this.type.startsWith('cactus')) {
+          const color = isNight ? '#22c55e' : '#15803d';
+          ctx.fillStyle = color;
+          if (this.type === 'cactus_s') {
+            ctx.beginPath();
+            ctx.roundRect(this.x + 4, this.y, 16, this.height, 6);
+            ctx.fill();
+            // Side branches
+            ctx.fillRect(this.x, this.y + 14, 6, 4);
+            ctx.fillRect(this.x, this.y + 8, 4, 10);
+            ctx.fillRect(this.x + 18, this.y + 18, 6, 4);
+            ctx.fillRect(this.x + 20, this.y + 12, 4, 10);
+          } else {
+            ctx.beginPath();
+            ctx.roundRect(this.x + 3, this.y + 8, 16, this.height - 8, 6);
+            ctx.roundRect(this.x + 23, this.y, 18, this.height, 6);
+            ctx.fill();
+          }
+        } else {
+          // Flying Desert Hawk
+          ctx.translate(this.x, this.y);
+          const flap = Math.sin(this.wingTimer);
+          ctx.fillStyle = isNight ? '#cbd5e1' : '#334155';
+          ctx.beginPath();
+          ctx.ellipse(22, 16, 16, 7, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Beak
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.moveTo(6, 13);
+          ctx.lineTo(-4, 16);
+          ctx.lineTo(6, 19);
+          ctx.closePath();
+          ctx.fill();
+
+          // Wing flapping
+          ctx.fillStyle = isNight ? '#e2e8f0' : '#475569';
+          ctx.beginPath();
+          if (flap > 0) {
+            ctx.moveTo(16, 15);
+            ctx.lineTo(26, -2 - flap * 8);
+            ctx.lineTo(34, 14);
+          } else {
+            ctx.moveTo(16, 15);
+            ctx.lineTo(26, 28 - flap * 6);
+            ctx.lineTo(34, 14);
+          }
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    class Collectible {
+      constructor(x, y, type) {
+        this.x = x;
+        this.y = y;
+        this.type = type; // 'coin', 'shield', 'magnet', 'heart'
+        this.active = true;
+        this.spin = 0;
+      }
+
+      update(dt, speed, hero, hasMagnet) {
+        this.x -= speed * dt;
+        this.spin += dt * 6;
+
+        // Magnet attraction
+        if (hasMagnet && this.type === 'coin') {
+          const dx = (hero.x + 20) - this.x;
+          const dy = (hero.y - 30) - this.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 180) {
+            this.x += (dx / dist) * 450 * dt;
+            this.y += (dy / dist) * 450 * dt;
+          }
+        }
+      }
+
+      getHitbox() {
+        return { x: this.x - 12, y: this.y - 12, width: 24, height: 24 };
+      }
+
+      draw(ctx) {
+        if (!this.active) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        if (this.type === 'coin') {
+          // Spinning gold coin
+          const scaleX = Math.cos(this.spin);
+          ctx.scale(scaleX, 1);
+          ctx.fillStyle = '#fbbf24';
+          ctx.shadowColor = 'rgba(251, 191, 36, 0.6)';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(0, 0, 11, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#d97706';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else if (this.type === 'shield') {
+          // Blue Shield Icon
+          ctx.fillStyle = '#38bdf8';
+          ctx.shadowColor = 'rgba(56, 189, 248, 0.8)';
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.roundRect(-10, -10, 20, 20, 6);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText("🛡️", 0, 0);
+        } else if (this.type === 'magnet') {
+          // Magnet Icon
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(0, 0, 11, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText("🧲", 0, 0);
+        } else if (this.type === 'heart') {
+          // Extra Life Heart
+          ctx.fillStyle = '#ec4899';
+          ctx.shadowColor = 'rgba(236, 72, 153, 0.8)';
+          ctx.shadowBlur = 10;
+          ctx.font = '16px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText("❤️", 0, 0);
+        }
+
+        ctx.restore();
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 11b. ATTACK DIRECTOR
+     * Schedules enemy attacks on a configurable interval. Each attack has 3
+     * phases: TELEGRAPH -> STRIKE (hitbox live) -> RECOVER (vulnerable).
+     * Attacks are always fair: player has the full telegraph window to dodge.
+     * ========================================================================
+     */
+    class AttackDirector {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.active = true;
+        this.phase = 'IDLE'; // IDLE | TELEGRAPH | STRIKE | RECOVER
+        this.phaseTimer = 0;
+        this.currentInterval = CONFIG.attack.maxInterval;
+        this.nextAttackIn = this._rollInterval(this.currentInterval);
+        this.lastAttackTime = -99;
+        this.cycleCount = 0;
+
+        // Current attacker: 1 = Enemy 1 (enemy1.png), 2 = Enemy 2 (ememy2.png)
+        this.attacker = 1;
+        this.attackType = 'low_swing'; // low_swing | high_throw | charge
+        this.enemyX = 0;
+        this.enemyTargetX = 0;
+        this.projectile = null;
+        this.projectileX = 0;
+        this.projectileY = 0;
+        this.shakeAmt = 0;
+        this.hitRegistered = false;
+        this.dodgeSuccess = false;
+
+        // Feedback labels
+        this.feedbackLabel = '';
+        this.feedbackTimer = 0;
+      }
+
+      _rollInterval(max) {
+        const min = CONFIG.attack.minInterval; // 3
+        const maxVal = Math.max(min + 1, max || CONFIG.attack.maxInterval); // 7
+        return min + Math.random() * (maxVal - min); // 3 to 7 seconds randomly
+      }
+
+      update(dt, game) {
+        if (!this.active) return;
+        if (game.isCutsceneState?.()) return;
+
+        const now = performance.now() / 1000;
+
+        // Countdown between attacks (3 to 7 seconds)
+        if (this.phase === 'IDLE') {
+          this.nextAttackIn -= dt;
+          const gap = now - this.lastAttackTime;
+          if (this.nextAttackIn <= 0 && gap >= CONFIG.attack.minGapBetween) {
+            this._beginAttack(game);
+          }
+          return;
+        }
+
+        this.phaseTimer -= dt;
+
+        if (this.phase === 'TELEGRAPH') {
+          // Enemy enters smoothly from the right to stand right in front of hero
+          this.enemyTargetX = game.hero.x + 190;
+          this.enemyX += (this.enemyTargetX - this.enemyX) * 10 * dt;
+          this.shakeAmt = Math.sin(this.phaseTimer * 30) * 5;
+
+          if (this.phaseTimer <= 0) {
+            this.phase = 'STRIKE';
+            this.phaseTimer = CONFIG.attack.strikeDuration;
+            this.hitRegistered = false;
+            this.dodgeSuccess = false;
+
+            if (this.attackType === 'high_throw') {
+              this.projectileX = this.enemyX - 10;
+              this.projectileY = CONFIG.canvas.groundY - 72;
+            }
+          }
+        } else if (this.phase === 'STRIKE') {
+          let attackObjX = 0;
+          if (this.attackType === 'high_throw') {
+            // High projectile flies across road toward Hero
+            this.projectileX -= 720 * dt;
+            this.projectileY += 10 * dt;
+            attackObjX = this.projectileX;
+          } else {
+            // Enemy lunges fast straight at hero
+            this.enemyX -= 520 * dt;
+            attackObjX = this.enemyX;
+          }
+
+          // Check physical contact when attack object reaches hero
+          const inHitZone = (attackObjX <= game.hero.x + 55 && attackObjX >= game.hero.x - 35);
+
+          if (!this.hitRegistered && !this.dodgeSuccess && inHitZone) {
+            // If in LOVE MODE, hero is invincible and automatically deflects the attack!
+            if (game.loveModeTimer > 0) {
+              this.dodgeSuccess = true;
+              this.onDodged(true, game);
+              game.particles.emitBurst(attackObjX, CONFIG.canvas.groundY - 50, 16, '#ec4899', 140, 'heart');
+            } else {
+              const dodged = this.checkDodge(game.hero);
+              if (dodged) {
+                this.dodgeSuccess = true;
+                const perfect = this.isPerfectDodge();
+                this.onDodged(perfect, game);
+              } else {
+                // HERO & ENEMY MEET -> REDUCE A HEART!
+                this.hitRegistered = true;
+                this.shakeAmt = 0;
+                this.phase = 'RECOVER';
+                this.phaseTimer = CONFIG.attack.recoverDuration;
+
+                // Immediately reduce a Heart!
+                game.triggerHit(1);
+
+                // If Heroine is with Hero in RUN_TOGETHER, villain kidnaps her!
+                if (game.heroine.active && game.state === 'RUN_TOGETHER') {
+                  game.triggerKidnap(this.attacker);
+                  return;
+                }
+              }
+            }
+          }
+
+          if (this.phaseTimer <= 0) {
+            this.phase = 'RECOVER';
+            this.phaseTimer = CONFIG.attack.recoverDuration;
+            this.shakeAmt = 0;
+          }
+        } else if (this.phase === 'RECOVER') {
+          // Enemy stumbles backwards and escapes off screen
+          this.enemyX += 360 * dt;
+          if (this.phaseTimer <= 0 || this.enemyX > CONFIG.canvas.width + 120) {
+            this._endAttack(game);
+          }
+        }
+
+        if (this.feedbackTimer > 0) this.feedbackTimer -= dt;
+      }
+
+      _beginAttack(game) {
+        this.cycleCount++;
+        this.lastAttackTime = performance.now() / 1000;
+
+        // Alternate or randomize between Enemy 1 (enemy1.png) and Enemy 2 (ememy2.png)
+        this.attacker = Math.random() < 0.5 ? 1 : 2;
+
+        // Pick attack type
+        const roll = Math.random();
+        if (roll < 0.4) {
+          this.attackType = 'low_swing'; // Jump to dodge
+        } else if (roll < 0.75) {
+          this.attackType = 'high_throw'; // Duck to dodge
+          this.projectile = ['chappal', 'pot', 'coconut'][Math.floor(Math.random() * 3)];
+        } else {
+          this.attackType = 'charge'; // Jump to dodge
+        }
+
+        this.enemyX = CONFIG.canvas.width + 60;
+        this.enemyTargetX = game.hero.x + 190;
+        this.phase = 'TELEGRAPH';
+        this.phaseTimer = CONFIG.attack.telegraphDuration;
+        this.shakeAmt = 0;
+        this.hitRegistered = false;
+        this.dodgeSuccess = false;
+
+        // Clear any obstacles currently in the attack zone so player is never hit by 2 objects at once!
+        if (game.obstacles) {
+          game.obstacles = game.obstacles.filter(obs => obs.x < game.hero.x - 20 || obs.x > CONFIG.canvas.width * 0.85);
+        }
+
+        // Randomly roll next attack in 3 to 7 seconds
+        this.nextAttackIn = 3.0 + Math.random() * 4.0;
+
+        game.audio.playAttackWarning();
+        if ('vibrate' in navigator) navigator.vibrate(30);
+      }
+
+      _endAttack(game) {
+        this.phase = 'IDLE';
+        this.shakeAmt = 0;
+        this.attackType = 'low_swing';
+        this.hitRegistered = false;
+        this.dodgeSuccess = false;
+      }
+
+      getDodgeRequired() {
+        if (this.attackType === 'high_throw') return 'DUCK';
+        return 'JUMP';
+      }
+
+      checkDodge(hero) {
+        const req = this.getDodgeRequired();
+        if (req === 'JUMP' && !hero.isGrounded) return true;
+        if (req === 'DUCK' && hero.isDucking) return true;
+        return false;
+      }
+
+      checkHit(hero) {
+        if (this.phase !== 'STRIKE') return false;
+        return !this.checkDodge(hero);
+      }
+
+      isPerfectDodge() {
+        return this.phase === 'STRIKE' &&
+          this.phaseTimer > (CONFIG.attack.strikeDuration - CONFIG.attack.perfectDodgeWindow);
+      }
+
+      onDodged(perfect, game) {
+        this.feedbackLabel = perfect ? 'PERFECT!' : 'DODGED!';
+        this.feedbackTimer = 1.2;
+        game.score += CONFIG.attack.dodgeComboBonus * (perfect ? 2 : 1) * (game.loveModeTimer > 0 ? 2 : 1);
+        game.comboStreak++;
+        if (perfect) {
+          game.slowMoTimer = CONFIG.attack.perfectSlowMo;
+          game.audio.playPerfectDodge();
+          // Perfect dodge fills Love Meter by +5 when with heroine!
+          if (game.heroine?.active && game.state === 'RUN_TOGETHER') {
+            game.addLove(CONFIG.love.fillPerPerfectDodge);
+          }
+        }
+        if (game.state === 'RESCUE_CHASE') {
+          game.rescueMeter = Math.min(100, game.rescueMeter + (perfect ? 20 : 12));
+        }
+        this.phase = 'RECOVER';
+        this.phaseTimer = CONFIG.attack.recoverDuration;
+      }
+
+      draw(ctx, game) {
+        if (this.phase === 'IDLE') return;
+
+        const groundY = CONFIG.canvas.groundY;
+        const img = (this.attacker === 1) ? game.images.enemy1 : game.images.enemy2;
+        const w = (this.attacker === 1) ? 65 : 68;
+        const h = (this.attacker === 1) ? 110 : 96;
+
+        const sx = (this.phase === 'TELEGRAPH') ? this.shakeAmt : 0;
+        const drawX = this.enemyX + sx;
+
+        ctx.save();
+        ctx.translate(drawX, groundY);
+
+        // 1. Draw Villain Sprite (enemy1.png or ememy2.png)
+        if (img && img.complete) {
+          if (this.phase === 'RECOVER' && this.dodgeSuccess) {
+            ctx.save();
+            ctx.rotate(0.18);
+            ctx.drawImage(img, 0, -h, w, h);
+            ctx.restore();
+          } else {
+            ctx.drawImage(img, 0, -h, w, h);
+          }
+        }
+
+        // 2. Comic Speech Bubble & Expressions
+        if (this.attacker === 1) {
+          // Enemy 1: "Sir Kolla Varnga !" speech bubble during telegraph
+          if (this.phase === 'TELEGRAPH') {
+            ctx.save();
+            ctx.translate(0, -h - 32);
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.roundRect(-65, -16, 130, 30, 8);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, 14);
+            ctx.lineTo(10, 22);
+            ctx.lineTo(-10, 14);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#b91c1c';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText("Sir Kolla Varnga !", 0, 0);
+            ctx.restore();
+          }
+        } else {
+          // Enemy 2: Angry comic steam puffs 💢
+          ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+          ctx.font = 'bold 18px sans-serif';
+          ctx.fillText("💢", 15, -h - 10);
+        }
+
+        // 3. TELEGRAPH Warning Alert & Dodge Instruction
+        if (this.phase === 'TELEGRAPH') {
+          ctx.save();
+          ctx.font = 'bold 26px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('⚠️', w / 2, -h - 48);
+
+          const req = this.getDodgeRequired();
+          ctx.font = 'bold 11px "Press Start 2P", monospace';
+          ctx.fillStyle = '#fbbf24';
+          ctx.shadowColor = '#000';
+          ctx.shadowBlur = 4;
+          ctx.fillText(req === 'JUMP' ? '⬆ JUMP TO DODGE!' : '⬇ DUCK TO DODGE!', w / 2, -h - 26);
+          ctx.restore();
+        }
+
+        // 4. RECOVER Dizzy Reaction
+        if (this.phase === 'RECOVER' && this.dodgeSuccess) {
+          ctx.save();
+          ctx.font = '22px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('😵', w / 2, -h - 14);
+          ctx.font = 'bold 10px "Press Start 2P", monospace';
+          ctx.fillStyle = '#4ade80';
+          ctx.fillText('MISSED!', w / 2, -h - 34);
+          ctx.restore();
+        }
+
+        ctx.restore();
+
+        // 5. STRIKE Projectile (High Throw)
+        if (this.phase === 'STRIKE' && this.attackType === 'high_throw') {
+          ctx.save();
+          ctx.font = '28px sans-serif';
+          ctx.textAlign = 'center';
+          const emoji = this.projectile === 'chappal' ? '👡' : this.projectile === 'pot' ? '🪴' : '🥥';
+          ctx.translate(this.projectileX, this.projectileY);
+          ctx.rotate(performance.now() / 150);
+          ctx.fillText(emoji, 0, 0);
+          ctx.restore();
+        }
+
+        // 6. Floating Feedback ("DODGED!", "PERFECT!")
+        if (this.feedbackTimer > 0 && this.feedbackLabel) {
+          const alpha = Math.min(1, this.feedbackTimer);
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.font = 'bold 16px "Press Start 2P", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = this.feedbackLabel === 'PERFECT!' ? '#fbbf24' : '#4ade80';
+          ctx.shadowColor = ctx.fillStyle;
+          ctx.shadowBlur = 10;
+          ctx.fillText(this.feedbackLabel, CONFIG.canvas.width * 0.5, groundY - 70);
+          ctx.restore();
+        }
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 12. MAIN GAME ORCHESTRATOR & STATE MACHINE
+     * States: LOADING -> MENU -> RUNNING_SOLO -> HEROINE_MEET -> RUN_TOGETHER
+     *         -> ATTACK_WARNING -> HIT_STUN -> KIDNAP_CUTSCENE
+     *         -> RESCUE_CHASE -> RESCUE_FIGHT -> HEROINE_RESCUED
+     *         -> ENEMY1_AMBUSH -> ESCAPE -> ENEMY2_CHASE -> GAME_OVER
+     * ========================================================================
+     */
+    class Game {
+
+      constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+
+        this.state = 'LOADING';
+        this.timeScale = 1.0;
+        this.slowMoTimer = 0;
+
+        this.score = 0;
+        this.distance = 0;
+        this.highScore = parseInt(localStorage.getItem('vicky_runner_hi') || '0', 10);
+        this.lives = CONFIG.player.maxLives;
+        this.comboStreak = 0;
+
+        // Active Powerups
+        this.activePowerUps = {
+          shield: 0,
+          magnet: 0,
+          doubleScore: 0
+        };
+
+        this.lastMilestone = 0;
+
+        // Systems
+        this.audio = new AudioManager();
+        this.loader = new AssetLoader();
+        this.particles = new ParticlePool(250);
+        this.background = new Background(CONFIG.canvas.width, CONFIG.canvas.height, CONFIG.canvas.groundY);
+
+        // Obstacles & Spawning
+        this.obstacles = [];
+        this.collectibles = [];
+        this.obstacleTimer = 1.5;
+        this.powerUpSpawnTimer = 10;
+
+        // Story State Tracking
+        this.heroineMeetCandidate = null;
+        this.heroineJoined = false;
+
+        this.enemy1 = null;
+        this.enemy2 = null;
+
+        // Screen Shake
+        this.screenShake = 0;
+
+        // Attack Director
+        this.attackDirector = new AttackDirector();
+        this.attackDirector.active = false; // enabled when RUN_TOGETHER begins
+
+        // Kidnap / Rescue state
+        this.kidnapMeter = 0;          // 0-100
+        this.kidnapRetries = 0;
+        this.rescueMeter = 0;          // 0-100 during RESCUE_CHASE
+        this.rescueTimer = 0;
+        this.cutsceneTimer = 0;
+        this.fightRound = 0;
+        this.fightPhase = 'IDLE';      // IDLE | TELEGRAPH | STRIKE | RECOVER | DONE
+        this.fightPhaseTimer = 0;
+        this.fightHitsLeft = CONFIG.fight.rounds;
+        this.attackBtnEl = document.getElementById('attackBtn');
+
+        // Cache UI elements
+        this.scoreEl = document.getElementById('scoreText');
+        this.hiScoreEl = document.getElementById('hiScoreText');
+        this.loadingOverlay = document.getElementById('loadingOverlay');
+        this.loadingProgress = document.getElementById('loadingProgress');
+        this.loadingPct = document.getElementById('loadingPct');
+        this.startOverlay = document.getElementById('startOverlay');
+        this.pauseOverlay = document.getElementById('pauseOverlay');
+        this.gameOverOverlay = document.getElementById('gameOverOverlay');
+        this.gameOverPunchline = document.getElementById('gameOverPunchline');
+        this.finalScoreVal = document.getElementById('finalScoreVal');
+        this.finalDistanceVal = document.getElementById('finalDistanceVal');
+        this.finalBestVal = document.getElementById('finalBestVal');
+        this.muteBtn = document.getElementById('muteBtn');
+
+        this.initCanvasResolution();
+        this.updateHiScoreDisplay();
+        this.bindGlobalControls();
+        this.loadAssets();
+      }
+
+      initCanvasResolution() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+        this.canvas.width = CONFIG.canvas.width * dpr;
+        this.canvas.height = CONFIG.canvas.height * dpr;
+        this.ctx.resetTransform?.();
+        this.ctx.scale(dpr, dpr);
+
+        window.addEventListener('resize', () => {
+          const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+          this.canvas.width = CONFIG.canvas.width * dpr;
+          this.canvas.height = CONFIG.canvas.height * dpr;
+          this.ctx.resetTransform?.();
+          this.ctx.scale(dpr, dpr);
+        });
+
+        // Auto pause on backgrounding or rotation
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && this.isPlayingState()) {
+            this.setPause(true);
+          }
+        });
+      }
+
+      isPlayingState() {
+        return [
+          'RUNNING_SOLO', 'HEROINE_MEET', 'RUN_TOGETHER',
+          'ENEMY1_AMBUSH', 'ESCAPE', 'ENEMY2_CHASE',
+          'KIDNAP_CUTSCENE', 'RESCUE_CHASE', 'RESCUE_FIGHT', 'HEROINE_RESCUED'
+        ].includes(this.state);
+      }
+
+      isCutsceneState() {
+        return ['KIDNAP_CUTSCENE', 'HEROINE_RESCUED'].includes(this.state);
+      }
+
+      updateHiScoreDisplay() {
+        const formatted = String(this.highScore).padStart(5, '0');
+        if (this.hiScoreEl) this.hiScoreEl.textContent = `HI ${formatted}`;
+      }
+
+      loadAssets() {
+        this.loader.load(
+          CONFIG.assets,
+          (pct) => {
+            if (this.loadingProgress) this.loadingProgress.style.width = `${pct}%`;
+            if (this.loadingPct) this.loadingPct.textContent = `${pct}%`;
+          },
+          (images) => {
+            this.images = images;
+            this.hero = new Hero(CONFIG.canvas.groundY, images);
+            this.heroine = new Heroine(CONFIG.canvas.groundY, images.heroine);
+            this.enemy1 = new Enemy1(CONFIG.canvas.groundY, images.enemy1);
+            this.enemy2 = new Enemy2(CONFIG.canvas.groundY, images.enemy2);
+
+            // Hide loading, show start menu
+            setTimeout(() => {
+              this.loadingOverlay?.classList.add('hidden');
+              this.startOverlay?.classList.remove('hidden');
+              this.state = 'MENU';
+            }, 300);
+
+            // Launch animation loop
+            this.lastFrameTime = performance.now();
+            requestAnimationFrame((ts) => this.gameLoop(ts));
+          }
+        );
+      }
+
+      bindGlobalControls() {
+        this.inputs = new InputManager(
+          () => {
+            this.audio.init();
+            if (this.state === 'MENU' || this.state === 'GAME_OVER') {
+              this.startSprint();
+            } else if (this.state === 'KIDNAP_CUTSCENE') {
+              // Tap to skip cutscene
+              this.cutsceneTimer = 0;
+              this.triggerRescueChase();
+            } else if (this.isPlayingState()) {
+              if (this.state === 'RESCUE_FIGHT' && this.fightPhase === 'RECOVER') {
+                this.executeFightAttack();
+                return;
+              }
+              if (this.hero?.jumpStart()) {
+                this.audio.playJump();
+                if ('vibrate' in navigator) navigator.vibrate(15);
+              }
+            }
+          },
+          () => {
+            this.hero?.jumpEnd();
+          },
+          () => {
+            this.audio.init();
+            if (this.isPlayingState()) {
+              this.hero?.setDuck(true);
+              this.audio.playDuck();
+            }
+          },
+          () => {
+            this.hero?.setDuck(false);
+          },
+          () => {
+            this.audio.init();
+            if (this.state === 'RESCUE_FIGHT' && this.fightPhase === 'RECOVER') {
+              this.executeFightAttack();
+            }
+          },
+          () => {
+            this.togglePause();
+          }
+        );
+
+        // Buttons
+        document.getElementById('startPlayBtn')?.addEventListener('click', () => {
+          this.audio.init();
+          this.startSprint();
+        });
+
+        document.getElementById('restartBtn')?.addEventListener('click', () => {
+          this.audio.init();
+          this.startSprint();
+        });
+
+        document.getElementById('resumeBtn')?.addEventListener('click', () => {
+          this.setPause(false);
+        });
+
+        // ATTACK button: used during RESCUE_FIGHT recover window
+        this.attackBtnEl?.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          this.audio.init();
+          this.executeFightAttack();
+        });
+
+        document.getElementById('pauseBtn')?.addEventListener('click', () => {
+          this.togglePause();
+        });
+
+        this.muteBtn?.addEventListener('click', () => {
+          const isMuted = this.audio.toggleMute();
+          this.muteBtn.innerHTML = isMuted ? '🔇 Muted' : '🔊 Sound';
+        });
+
+        if (this.audio.muted && this.muteBtn) {
+          this.muteBtn.innerHTML = '🔇 Muted';
+        }
+      }
+
+      togglePause() {
+        if (this.isPlayingState()) {
+          this.setPause(true);
+        } else if (this.state === 'PAUSED') {
+          this.setPause(false);
+        }
+      }
+
+      setPause(pause) {
+        if (pause && this.isPlayingState()) {
+          this.prevPauseState = this.state;
+          this.state = 'PAUSED';
+          this.pauseOverlay?.classList.remove('hidden');
+        } else if (!pause && this.state === 'PAUSED') {
+          this.state = this.prevPauseState || 'RUNNING_SOLO';
+          this.pauseOverlay?.classList.add('hidden');
+        }
+      }
+
+      startSprint() {
+        this.score = 0;
+        this.distance = 0;
+        this.lives = CONFIG.player.maxLives;
+        this.comboStreak = 0;
+        this.timeScale = 1.0;
+        this.slowMoTimer = 0;
+        this.screenShake = 0;
+
+        this.activePowerUps = { shield: 0, magnet: 0, doubleScore: 0 };
+        this.lastMilestone = 0;
+
+        this.obstacles = [];
+        this.collectibles = [];
+        this.obstacleTimer = 1.8;
+
+        this.hero.reset();
+        this.heroine.reset();
+        this.enemy1.active = false;
+        this.enemy2.endChase();
+
+        this.heroineMeetCandidate = null;
+        this.heroineJoined = false;
+
+        // Reset attack director and kidnap systems
+        this.attackDirector.reset();
+        this.attackDirector.active = true;
+        this.kidnapperId = 1;
+        this.kidnapVillainX = 0;
+        this.kidnapMeter = 0;
+        this.kidnapRetries = 0;
+        this.rescueMeter = 0;
+        this.rescueTimer = 0;
+        this.cutsceneTimer = 0;
+        this.fightHitsLeft = CONFIG.fight.rounds;
+        this.fightPhase = 'IDLE';
+        this.fightPhaseTimer = 0;
+        this._setAttackBtn(false);
+
+        this.state = 'RUNNING_SOLO';
+
+        this.startOverlay?.classList.add('hidden');
+        this.gameOverOverlay?.classList.add('hidden');
+        this.pauseOverlay?.classList.add('hidden');
+      }
+
+      _setAttackBtn(visible) {
+        if (this.attackBtnEl) this.attackBtnEl.style.display = visible ? 'flex' : 'none';
+      }
+
+      executeFightAttack() {
+        if (this.state === 'RESCUE_FIGHT' && this.fightPhase === 'RECOVER') {
+          this.fightHitsLeft--;
+          this.audio.playFightHit();
+          this.score += CONFIG.fight.recoverWindowBonus;
+          this.particles.emitBurst(480, CONFIG.canvas.groundY - 50, 24, '#a855f7', 180, 'star');
+          this._setAttackBtn(false);
+          if (this.fightHitsLeft <= 0) {
+            this.triggerHeroineRescued();
+          } else {
+            this.fightPhase = 'TELEGRAPH';
+            this.fightPhaseTimer = CONFIG.attack.telegraphDuration;
+          }
+        }
+      }
+
+      // Single unified exit point for ALL game-over scenarios
+      endGame(reason) {
+        if (this.state === 'GAME_OVER') return;
+        this.state = 'GAME_OVER';
+        this.attackDirector.active = false;
+        this._setAttackBtn(false);
+        this.audio.playSadTrombone();
+        if ('vibrate' in navigator) navigator.vibrate([80, 50, 120]);
+
+        if (this.score > this.highScore) {
+          this.highScore = Math.floor(this.score);
+          localStorage.setItem('vicky_runner_hi', this.highScore);
+          this.updateHiScoreDisplay();
+        }
+
+        const reasonPunchlines = {
+          LIVES_OUT: CONFIG.punchlines[Math.floor(Math.random() * CONFIG.punchlines.length)],
+          ESCAPE_FAILED: "Enemy escape aagitaan da! Heroine-a maari vitiye thalaiva!",
+          DANGER_100: "Danger Meter 100%! Enemy 2 unna thookitaan thambi!"
+        };
+        const msg = reasonPunchlines[reason] || CONFIG.punchlines[0];
+        if (this.gameOverPunchline) this.gameOverPunchline.textContent = `"${msg}"`;
+
+        if (this.finalScoreVal) this.finalScoreVal.textContent = String(Math.floor(this.score)).padStart(5, '0');
+        if (this.finalDistanceVal) this.finalDistanceVal.textContent = `${Math.floor(this.distance)}m`;
+        if (this.finalBestVal) this.finalBestVal.textContent = String(this.highScore).padStart(5, '0');
+
+        setTimeout(() => { this.gameOverOverlay?.classList.remove('hidden'); }, 500);
+      }
+
+      triggerHit(damage = 1) {
+        if (this.hero.invulnerableTimer > 0) return;
+
+        // Shield absorbs hit
+        if (this.activePowerUps.shield > 0) {
+          this.activePowerUps.shield = 0;
+          this.particles.emitBurst(this.hero.x + 20, this.hero.y - 30, 16, '#38bdf8', 140);
+          this.audio.playHit();
+          this.hero.invulnerableTimer = 1.0;
+          return;
+        }
+
+        // Hero & obstacles or enemies meet: reduce a heart!
+        this.lives -= damage;
+        this.comboStreak = 0;
+        this.screenShake = 14;
+        this.hero.invulnerableTimer = CONFIG.player.invulnerabilityDuration;
+        this.audio.playHit();
+        if ('vibrate' in navigator) navigator.vibrate([40, 30, 80]);
+
+        if (this.state === 'ENEMY2_CHASE') {
+          this.enemy2.danger = Math.min(100, this.enemy2.danger + CONFIG.chase.hitSpike);
+        }
+
+        // Note: Obstacles (cacti/birds) do NOT kidnap heroine!
+        // Kidnapping is only triggered directly when an enemy strikes hero during RUN_TOGETHER.
+
+        if (this.lives <= 0) {
+          this.endGame('LIVES_OUT');
+        }
+      }
+
+      triggerGameOver() { this.endGame('LIVES_OUT'); } // keep legacy calls working
+
+      triggerKidnap(attackerId = 1) {
+        this.state = 'KIDNAP_CUTSCENE';
+        this.kidnapperId = attackerId;
+        this.heroine.active = false;
+        this.kidnapVillainX = this.hero.x + 40;
+        this.cutsceneTimer = CONFIG.kidnap.cutsceneDuration;
+        this.slowMoTimer = 0.8;
+        this.audio.playKidnapScream();
+        this.screenShake = 18;
+        if ('vibrate' in navigator) navigator.vibrate([60, 40, 100, 40, 60]);
+        // Stun hero briefly
+        this.hero.invulnerableTimer = CONFIG.kidnap.cutsceneDuration + 0.6;
+      }
+
+      triggerRescueChase() {
+        this.state = 'RESCUE_CHASE';
+        this.heroine.active = false;
+        this.kidnapMeter = 0;
+        this.rescueMeter = 0;
+        this.rescueTimer = CONFIG.kidnap.rescueTimeLimit;
+        this.slowMoTimer = 0;
+        this.obstacleTimer = 1.4;
+      }
+
+      triggerRescueFight() {
+        this.state = 'RESCUE_FIGHT';
+        this.fightHitsLeft = CONFIG.fight.rounds;
+        this.fightPhase = 'TELEGRAPH';
+        this.fightPhaseTimer = CONFIG.attack.telegraphDuration;
+        this._setAttackBtn(false);
+      }
+
+      triggerHeroineRescued() {
+        this.state = 'HEROINE_RESCUED';
+        this.heroine.active = true;
+        this.kidnapMeter = CONFIG.kidnap.rescueLoveMeter;
+        this.score += CONFIG.kidnap.rescueScoreBonus;
+        this.audio.playRescueSuccess();
+        this.particles.emitBurst(this.hero.x + 30, this.hero.y - 40, 30, '#f43f5e', 180, 'heart');
+        this.cutsceneTimer = 2.0;
+        this._setAttackBtn(false);
+      }
+
+      spawnObstacle() {
+        // Fix "Sometimes Two objects come":
+        // 1. Never spawn an obstacle when an enemy attack or cutscene is happening!
+        if (this.attackDirector && this.attackDirector.phase !== 'IDLE') {
+          this.obstacleTimer = 1.2;
+          return;
+        }
+
+        // 2. Enforce minimum spacing between consecutive obstacles (at least 320px)
+        const minSpacing = 320;
+        for (const obs of this.obstacles) {
+          if (obs.x > CONFIG.canvas.width - minSpacing) {
+            this.obstacleTimer = 0.5;
+            return;
+          }
+        }
+
+        const r = Math.random();
+        let type = 'cactus_s';
+
+        if (this.distance > 80 && r > 0.65) {
+          type = Math.random() < 0.5 ? 'bird_low' : 'bird_high';
+        } else if (r > 0.4) {
+          type = 'cactus_d';
+        }
+
+        this.obstacles.push(new Obstacle(CONFIG.canvas.width + 40, CONFIG.canvas.groundY, type));
+
+        // Spawning timer ensuring jumpable intervals
+        const speed = this.getCurrentSpeed();
+        const baseInterval = (880 / speed) * (1.0 + Math.random() * 0.6);
+        this.obstacleTimer = Math.max(1.2, baseInterval);
+      }
+
+      spawnCollectibles() {
+        // Do not spawn collectibles during enemy attack
+        if (this.attackDirector && this.attackDirector.phase !== 'IDLE') return;
+
+        const x = CONFIG.canvas.width + 40;
+        // Never spawn on top of an existing obstacle (safe 140px separation)
+        const nearObstacle = this.obstacles.some(o => Math.abs(o.x - x) < 140);
+        if (nearObstacle) return;
+
+        const y = CONFIG.canvas.groundY - (Math.random() < 0.5 ? 40 : 85);
+
+        // Powerup or coin
+        if (Math.random() < 0.15) {
+          const types = ['shield', 'magnet', 'heart'];
+          const type = types[Math.floor(Math.random() * types.length)];
+          this.collectibles.push(new Collectible(x, y, type));
+        } else {
+          // Trail of 3 coins
+          for (let i = 0; i < 3; i++) {
+            this.collectibles.push(new Collectible(x + i * 36, y, 'coin'));
+          }
+        }
+      }
+
+      getCurrentSpeed() {
+        const bonus = Math.floor(this.score / 100) * CONFIG.physics.speedScalePer100Pts;
+        const spd = Math.min(CONFIG.physics.maxSpeed, CONFIG.physics.baseSpeed + bonus);
+        return spd * (this.slowMoTimer > 0 ? 0.55 : 1.0);
+      }
+
+      checkCollision(rectA, rectB) {
+        return (
+          rectA.x < rectB.x + rectB.width &&
+          rectA.x + rectA.width > rectB.x &&
+          rectA.y < rectB.y + rectB.height &&
+          rectA.y + rectA.height > rectB.y
+        );
+      }
+
+      // ======================================================================
+      // MAIN UPDATE TICK (Delta-Time driven for 60Hz - 120Hz consistency)
+      // ======================================================================
+      update(dt) {
+        // Slow motion countdown
+        if (this.slowMoTimer > 0) {
+          this.slowMoTimer -= dt;
+        }
+
+        // Screen shake decay
+        if (this.screenShake > 0) {
+          this.screenShake -= dt * 25;
+        }
+
+        if (!this.isPlayingState()) return;
+
+        const speed = this.getCurrentSpeed();
+        const deltaDist = (speed * dt) * 0.05; // 1 unit ~ 20px
+        this.distance += deltaDist;
+
+        // Score progression (2x bonus if active)
+        const scoreMultiplier = this.activePowerUps.doubleScore > 0 ? 2 : 1;
+        this.score += deltaDist * scoreMultiplier;
+
+        // Milestone audio ding
+        const current100 = Math.floor(this.score / 100);
+        if (current100 > this.lastMilestone && current100 > 0) {
+          this.lastMilestone = current100;
+          this.audio.playCoin();
+          this.scoreEl?.classList.add('milestone-flash');
+          setTimeout(() => this.scoreEl?.classList.remove('milestone-flash'), 800);
+        }
+
+        if (this.scoreEl) {
+          this.scoreEl.textContent = String(Math.floor(this.score)).padStart(5, '0');
+        }
+
+        // Active Powerup Timers
+        Object.keys(this.activePowerUps).forEach(key => {
+          if (this.activePowerUps[key] > 0) {
+            this.activePowerUps[key] -= dt;
+          }
+        });
+
+        // --------------------------------------------------------------------
+        // STORY STATE MACHINE PROGRESSION
+        // --------------------------------------------------------------------
+        // 1. SOLO -> HEROINE_MEET
+        if (this.state === 'RUNNING_SOLO') {
+          if (!this.isCutsceneState() && this.attackDirector.active) {
+            this.attackDirector.update(dt, this);
+          }
+          if (this.distance >= CONFIG.story.heroineMeetDistance && !this.heroineJoined) {
+            this.state = 'HEROINE_MEET';
+            this.heroineMeetCandidate = {
+              x: CONFIG.canvas.width + 60,
+              y: CONFIG.canvas.groundY
+            };
+          }
+        }
+
+        // Handling HEROINE_MEET approach
+        if (this.state === 'HEROINE_MEET' && this.heroineMeetCandidate) {
+          this.heroineMeetCandidate.x -= speed * dt;
+          if (this.heroineMeetCandidate.x <= this.hero.x + 60) {
+            this.heroineJoined = true;
+            this.heroine.active = true;
+            this.heroineMeetCandidate = null;
+            this.state = 'RUN_TOGETHER';
+            this.audio.playHeroineMeet();
+            this.particles.emitBurst(this.hero.x + 30, this.hero.y - 40, 24, '#f43f5e', 140, 'heart');
+            this.attackDirector.active = true;
+          }
+        }
+
+        // 2. RUN_TOGETHER — frequent enemy attacks, kidnap loop
+        if (this.state === 'RUN_TOGETHER') {
+          if (!this.attackDirector.active) {
+            this.attackDirector.active = true;
+          }
+          if (!this.isCutsceneState()) {
+            this.attackDirector.update(dt, this);
+          }
+        }
+
+        // 3. ENEMY1_AMBUSH approach & dodge quick-time event
+        if (this.state === 'ENEMY1_AMBUSH' && this.enemy1.active) {
+          this.enemy1.x -= speed * dt;
+
+          if (this.enemy1.x < CONFIG.canvas.width - 240 && !this.enemy1.spoken) {
+            this.enemy1.spoken = true;
+            this.audio.playEnemySting();
+            this.audio.speakEnemyQuote();
+            this.enemy1.attackProgress = 0.05;
+          }
+
+          if (this.enemy1.attackProgress > 0 && !this.enemy1.escaped) {
+            const playerDodged =
+              (this.enemy1.requiredAction === 'JUMP' && !this.hero.isGrounded) ||
+              (this.enemy1.requiredAction === 'DUCK' && this.hero.isDucking);
+
+            if (Math.abs(this.enemy1.x - this.hero.x) < 80) {
+              if (playerDodged) {
+                this.enemy1.escaped = true;
+                this.state = 'ESCAPE';
+                this.audio.playEscapeSuccess();
+                this.slowMoTimer = 1.2;
+                this.score += 500;
+                this.particles.emitBurst(this.enemy1.x, this.enemy1.y - 40, 30, '#fbbf24', 180, 'star');
+                setTimeout(() => {
+                  this.enemy1.active = false;
+                  this.state = 'ENEMY2_CHASE';
+                  this.enemy2.startChase();
+                }, 1400);
+              } else if (this.enemy1.attackProgress >= 0.75) {
+                this.triggerHit(1);
+                this.enemy1.escaped = true;
+                setTimeout(() => {
+                  this.enemy1.active = false;
+                  if (this.lives > 0) {
+                    this.state = 'ENEMY2_CHASE';
+                    this.enemy2.startChase();
+                  }
+                }, 800);
+              }
+            }
+          }
+        }
+
+        // 4. ENEMY2_CHASE
+        if (this.state === 'ENEMY2_CHASE') {
+          this.enemy2.update(dt, this.hero.x);
+
+          if (!this.lastHeartbeat || (performance.now() - this.lastHeartbeat > Math.max(250, 900 - this.enemy2.danger * 7))) {
+            this.lastHeartbeat = performance.now();
+            this.audio.playHeartbeatPulse(this.enemy2.danger);
+          }
+
+          if (this.enemy2.danger >= 100) {
+            this.endGame('DANGER_100');
+            return;
+          }
+
+          if (this.distance >= CONFIG.story.enemy2ChaseDistance + CONFIG.chase.chaseDurationMeters) {
+            this.enemy2.endChase();
+            this.score += 1000;
+            this.audio.playEscapeSuccess();
+            this.particles.emitBurst(this.hero.x + 40, this.hero.y - 40, 30, '#22c55e', 200, 'confetti');
+            this.state = 'RUN_TOGETHER';
+            this.attackDirector.active = true;
+          }
+        }
+
+        // 5. KIDNAP_CUTSCENE
+        if (this.state === 'KIDNAP_CUTSCENE') {
+          this.cutsceneTimer -= dt;
+          this.kidnapVillainX = (this.kidnapVillainX || (this.hero.x + 40)) + (speed * 0.7 + 220) * dt;
+          if (this.cutsceneTimer <= 0) {
+            this.triggerRescueChase();
+          }
+          return; // no obstacle / scoring during cutscene
+        }
+
+        // 6. RESCUE_CHASE
+        if (this.state === 'RESCUE_CHASE') {
+          this.rescueTimer -= dt;
+
+          // Fill rescue meter on clean jumps and coin pickups (done below via passedObstacle hook)
+          if (this.rescueTimer <= 0) {
+            // Failed to rescue in time
+            this.kidnapRetries++;
+            this.heroine.active = false;
+            if (this.kidnapRetries >= CONFIG.kidnap.rescueMaxRetries) {
+              this.endGame('ESCAPE_FAILED');
+              return;
+            } else {
+              this.lives = Math.max(1, this.lives - 1);
+              // Go back to heroine meet
+              this.heroineJoined = false;
+              this.heroineMeetCandidate = null;
+              this.state = 'RUNNING_SOLO';
+            }
+          }
+
+          if (this.rescueMeter >= 100) {
+            this.triggerRescueFight();
+          }
+        }
+
+        // 7. RESCUE_FIGHT mini-game
+        if (this.state === 'RESCUE_FIGHT') {
+          this.fightPhaseTimer -= dt;
+
+          if (this.fightPhase === 'TELEGRAPH') {
+            if (this.fightPhaseTimer <= 0) {
+              this.fightPhase = 'STRIKE';
+              this.fightPhaseTimer = CONFIG.attack.strikeDuration;
+              this._setAttackBtn(false);
+            }
+          } else if (this.fightPhase === 'STRIKE') {
+            if (this.fightPhaseTimer <= 0) {
+              // Player missed the dodge — take a hit
+              this.triggerHit(1);
+              if (this.state === 'GAME_OVER') return;
+              this.fightPhase = 'RECOVER';
+              this.fightPhaseTimer = CONFIG.attack.recoverDuration;
+              this._setAttackBtn(true); // show ATTACK button during recover
+            } else {
+              // Check dodge
+              const fightDodge = (this.fightPhase === 'STRIKE' &&
+                (this.hero.isGrounded === false || this.hero.isDucking));
+              if (fightDodge) {
+                this.fightPhase = 'RECOVER';
+                this.fightPhaseTimer = CONFIG.attack.recoverDuration;
+                this._setAttackBtn(true);
+              }
+            }
+          } else if (this.fightPhase === 'RECOVER') {
+            if (this.fightPhaseTimer <= 0) {
+              this._setAttackBtn(false);
+              this.fightPhase = 'TELEGRAPH';
+              this.fightPhaseTimer = CONFIG.attack.telegraphDuration;
+            }
+          }
+        }
+
+        // 8. HEROINE_RESCUED cutscene
+        if (this.state === 'HEROINE_RESCUED') {
+          this.cutsceneTimer -= dt;
+          if (this.cutsceneTimer <= 0) {
+            this.state = 'RUN_TOGETHER';
+            this.attackDirector.active = true;
+            this.attackDirector.nextAttackIn = this.attackDirector._rollInterval(this.attackDirector.currentInterval);
+          }
+          return; // skip obstacle logic during celebration
+        }
+
+        // Attack director runs in RESCUE_CHASE to keep intense chase pressure
+        if (this.state === 'RESCUE_CHASE') {
+          if (!this.attackDirector.active) this.attackDirector.active = true;
+          this.attackDirector.update(dt, this);
+        }
+
+        // --------------------------------------------------------------------
+        // ENTITIES UPDATE
+        // --------------------------------------------------------------------
+        this.background.update(dt, speed, Math.floor(this.score));
+        this.hero.update(dt, speed, this.particles);
+        this.heroine.update(dt, speed, this.hero, this.particles);
+        this.particles.update(dt);
+
+        // Spawn obstacles
+        this.obstacleTimer -= dt;
+        if (this.obstacleTimer <= 0 && this.state !== 'ENEMY1_AMBUSH') {
+          this.spawnObstacle();
+        }
+
+        // Spawn collectibles / powerups
+        this.powerUpSpawnTimer -= dt;
+        if (this.powerUpSpawnTimer <= 0) {
+          this.spawnCollectibles();
+          this.powerUpSpawnTimer = CONFIG.powerUps.spawnIntervalMin + Math.random() * (CONFIG.powerUps.spawnIntervalMax - CONFIG.powerUps.spawnIntervalMin);
+        }
+
+        // Obstacles collision & update
+        const heroBox = this.hero.getHitbox();
+        for (let i = this.obstacles.length - 1; i >= 0; i--) {
+          const obs = this.obstacles[i];
+          obs.update(dt, speed);
+
+          // Clean jump detection
+          if (!obs.passed && obs.x + obs.width < this.hero.x) {
+            obs.passed = true;
+            this.comboStreak++;
+            if (this.state === 'ENEMY2_CHASE') {
+              this.enemy2.danger = Math.max(0, this.enemy2.danger - CONFIG.chase.cleanJumpReduction);
+            }
+            if (this.state === 'RESCUE_CHASE') {
+              this.rescueMeter = Math.min(100, this.rescueMeter + 8);
+            }
+          }
+
+          // Collision
+          if (this.checkCollision(heroBox, obs.getHitbox())) {
+            this.triggerHit(1);
+            this.obstacles.splice(i, 1);
+            continue;
+          }
+
+          if (obs.x < -80) {
+            this.obstacles.splice(i, 1);
+          }
+        }
+
+        // Collectibles update & collection
+        const hasMagnet = this.activePowerUps.magnet > 0;
+        for (let i = this.collectibles.length - 1; i >= 0; i--) {
+          const col = this.collectibles[i];
+          col.update(dt, speed, this.hero, hasMagnet);
+
+          if (this.checkCollision(heroBox, col.getHitbox())) {
+            if (col.type === 'coin') {
+              this.score += 25;
+              this.audio.playCoin();
+              this.particles.emitBurst(col.x, col.y, 8, '#fbbf24', 90, 'star');
+              if (this.state === 'RESCUE_CHASE') {
+                this.rescueMeter = Math.min(100, this.rescueMeter + 5);
+              }
+            } else if (col.type === 'shield') {
+              this.activePowerUps.shield = CONFIG.powerUps.shieldDuration;
+              this.audio.playPowerUp();
+              this.particles.emitBurst(col.x, col.y, 16, '#38bdf8', 120);
+            } else if (col.type === 'magnet') {
+              this.activePowerUps.magnet = CONFIG.powerUps.magnetDuration;
+              this.audio.playPowerUp();
+              this.particles.emitBurst(col.x, col.y, 16, '#ef4444', 120);
+            } else if (col.type === 'heart') {
+              this.lives = Math.min(CONFIG.player.maxLives, this.lives + 1);
+              this.audio.playPowerUp();
+              this.particles.emitBurst(col.x, col.y, 16, '#ec4899', 120, 'heart');
+            }
+
+            this.collectibles.splice(i, 1);
+            continue;
+          }
+
+          if (col.x < -40) {
+            this.collectibles.splice(i, 1);
+          }
+        }
+      }
+
+      // ======================================================================
+      // RENDER TICK
+      // ======================================================================
+      draw() {
+        this.ctx.save();
+
+        // Screen Shake
+        if (this.screenShake > 0) {
+          const sx = (Math.random() - 0.5) * this.screenShake;
+          const sy = (Math.random() - 0.5) * this.screenShake;
+          this.ctx.translate(sx, sy);
+        }
+
+        // 1. Parallax Environment
+        this.background.draw(this.ctx);
+
+        // 2. Obstacles & Collectibles
+        const isNight = this.background.nightAlpha > 0.4;
+        this.obstacles.forEach(o => o.draw(this.ctx, isNight));
+        this.collectibles.forEach(c => c.draw(this.ctx));
+
+        // 3. Meet Heroine Candidate Standing
+        if (this.state === 'HEROINE_MEET' && this.heroineMeetCandidate) {
+          this.ctx.drawImage(
+            this.images.heroine,
+            this.heroineMeetCandidate.x,
+            this.heroineMeetCandidate.y - 80,
+            54, 80
+          );
+          // Waving exclamation
+          this.ctx.fillStyle = '#ec4899';
+          this.ctx.font = 'bold 18px sans-serif';
+          this.ctx.fillText("💖", this.heroineMeetCandidate.x + 18, this.heroineMeetCandidate.y - 95);
+        }
+
+        // 4. Characters
+        this.heroine.draw(this.ctx, this.hero.isDucking);
+        this.hero.draw(this.ctx, this.activePowerUps.shield > 0);
+
+        // 5. Villains & Frequent Animated Enemy Attacks (enemy1.png & ememy2.png)
+        if (this.enemy1?.active) this.enemy1.draw(this.ctx);
+        if (this.enemy2?.active) this.enemy2.draw(this.ctx);
+        if (this.attackDirector) this.attackDirector.draw(this.ctx, this);
+
+        // 6. Kidnapper carrying Heroine during KIDNAP_CUTSCENE & RESCUE_CHASE
+        if (this.state === 'KIDNAP_CUTSCENE' || this.state === 'RESCUE_CHASE') {
+          const kImg = (this.kidnapperId === 2) ? this.images.enemy2 : this.images.enemy1;
+          const kw = (this.kidnapperId === 2) ? 68 : 65;
+          const kh = (this.kidnapperId === 2) ? 96 : 110;
+          const groundY = CONFIG.canvas.groundY;
+          let kx = 0;
+
+          if (this.state === 'KIDNAP_CUTSCENE') {
+            kx = this.kidnapVillainX || (this.hero.x + 40);
+          } else {
+            // In RESCUE_CHASE: villain is ahead on road, getting closer as rescueMeter increases
+            kx = CONFIG.canvas.width - 110 - (this.rescueMeter / 100) * (CONFIG.canvas.width - 320);
+          }
+
+          this.ctx.save();
+          this.ctx.translate(kx, groundY);
+          if (kImg && kImg.complete) {
+            this.ctx.drawImage(kImg, 0, -kh, kw, kh);
+          }
+          if (this.images.heroine && this.images.heroine.complete) {
+            this.ctx.save();
+            this.ctx.translate(kw - 15, -kh * 0.72);
+            this.ctx.rotate(0.22);
+            this.ctx.drawImage(this.images.heroine, 0, 0, 46, 70);
+            this.ctx.restore();
+          }
+          // Cry for help bubble
+          this.ctx.save();
+          this.ctx.translate(kw + 10, -kh - 12);
+          this.ctx.fillStyle = '#ffffff';
+          this.ctx.strokeStyle = '#ec4899';
+          this.ctx.lineWidth = 1.5;
+          this.ctx.beginPath(); this.ctx.roundRect(-60, -12, 120, 24, 6); this.ctx.fill(); this.ctx.stroke();
+          this.ctx.fillStyle = '#db2777';
+          this.ctx.font = 'bold 9px sans-serif';
+          this.ctx.textAlign = 'center';
+          this.ctx.fillText('"Kaapathunga!"', 0, 4);
+          this.ctx.restore();
+
+          this.ctx.restore();
+        }
+
+        // 7. Rescue Fight Showdown
+        if (this.state === 'RESCUE_FIGHT') {
+          const kImg = (this.kidnapperId === 2) ? this.images.enemy2 : this.images.enemy1;
+          const kw = (this.kidnapperId === 2) ? 68 : 65;
+          const kh = (this.kidnapperId === 2) ? 96 : 110;
+          const groundY = CONFIG.canvas.groundY;
+          const vx = 480;
+
+          this.ctx.save();
+          this.ctx.translate(vx, groundY);
+          if (kImg && kImg.complete) {
+            if (this.fightPhase === 'RECOVER') {
+              this.ctx.save();
+              this.ctx.rotate(0.18);
+              this.ctx.drawImage(kImg, 0, -kh, kw, kh);
+              this.ctx.restore();
+              this.ctx.font = '22px sans-serif';
+              this.ctx.fillText('😵', kw / 2, -kh - 12);
+            } else {
+              this.ctx.drawImage(kImg, 0, -kh, kw, kh);
+            }
+          }
+          this.ctx.restore();
+
+          // Heroine watching on right
+          if (this.images.heroine && this.images.heroine.complete) {
+            this.ctx.save();
+            this.ctx.translate(720, groundY);
+            this.ctx.drawImage(this.images.heroine, 0, -80, 54, 80);
+            this.ctx.font = 'bold 11px sans-serif';
+            this.ctx.fillStyle = '#ec4899';
+            this.ctx.fillText("Vicky, adi avana! 👊", 27, -95);
+            this.ctx.restore();
+          }
+        }
+
+        // 8. Particles
+        this.particles.draw(this.ctx);
+
+        // 9. IN-GAME HUD OVERLAYS (Lives, Danger Meter, Powerup timers)
+        this.drawHUD();
+
+        this.ctx.restore();
+      }
+
+      drawHUD() {
+        if (!this.isPlayingState()) return;
+        const ctx = this.ctx;
+
+        // A. Hearts / Lives Display (Top Left)
+        ctx.save();
+        ctx.font = '18px sans-serif';
+        for (let i = 0; i < CONFIG.player.maxLives; i++) {
+          const heart = i < this.lives ? '❤️' : '🖤';
+          ctx.fillText(heart, 18 + i * 26, 30);
+        }
+
+        // Distance in meters
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 12px "Press Start 2P", monospace';
+        ctx.fillText(`${Math.floor(this.distance)}m`, 18, 54);
+
+        // Combo streak
+        if (this.comboStreak >= 3) {
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 10px "Press Start 2P", monospace';
+          ctx.fillText(`STREAK x${this.comboStreak}!`, 18, 74);
+        }
+
+        // B. Active Powerup Icons
+        let pOffset = 0;
+        if (this.activePowerUps.shield > 0) {
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillText(`🛡️ ${Math.ceil(this.activePowerUps.shield)}s`, 18 + pOffset, 96);
+          pOffset += 85;
+        }
+        if (this.activePowerUps.magnet > 0) {
+          ctx.fillStyle = '#ef4444';
+          ctx.fillText(`🧲 ${Math.ceil(this.activePowerUps.magnet)}s`, 18 + pOffset, 96);
+          pOffset += 85;
+        }
+        ctx.restore();
+
+        // C. Danger Meter during ENEMY2_CHASE (Top Center)
+        if (this.state === 'ENEMY2_CHASE' && this.enemy2.active) {
+          ctx.save();
+          const cx = CONFIG.canvas.width * 0.5;
+          const barW = 220, barH = 14;
+
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(cx - barW * 0.5, 16, barW, barH, 7);
+          ctx.fill(); ctx.stroke();
+
+          const fillW = Math.max(4, (this.enemy2.danger / 100) * (barW - 4));
+          const dangerGrad = ctx.createLinearGradient(cx - barW * 0.5, 0, cx + barW * 0.5, 0);
+          dangerGrad.addColorStop(0, '#eab308');
+          dangerGrad.addColorStop(0.7, '#f97316');
+          dangerGrad.addColorStop(1, '#dc2626');
+          ctx.fillStyle = dangerGrad;
+          ctx.beginPath();
+          ctx.roundRect(cx - barW * 0.5 + 2, 18, fillW, barH - 4, 5);
+          ctx.fill();
+
+          ctx.fillStyle = '#f87171';
+          ctx.font = 'bold 10px "Press Start 2P", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`⚠️ ENEMY 2 CHASE! ${Math.floor(this.enemy2.danger)}%`, cx, 44);
+          ctx.restore();
+        }
+
+        // F. Rescue Meter during RESCUE_CHASE (top center)
+        if (this.state === 'RESCUE_CHASE') {
+          ctx.save();
+          const cx = CONFIG.canvas.width * 0.5;
+          const bw = 240, bh = 16;
+
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+          ctx.strokeStyle = '#a855f7';
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.roundRect(cx - bw / 2, 14, bw, bh, 8); ctx.fill(); ctx.stroke();
+
+          const rescFill = (this.rescueMeter / 100) * (bw - 4);
+          const rGrad = ctx.createLinearGradient(cx - bw / 2, 0, cx + bw / 2, 0);
+          rGrad.addColorStop(0, '#7c3aed');
+          rGrad.addColorStop(1, '#f43f5e');
+          ctx.fillStyle = rGrad;
+          ctx.beginPath(); ctx.roundRect(cx - bw / 2 + 2, 16, rescFill, bh - 4, 6); ctx.fill();
+
+          ctx.fillStyle = '#e879f9'; ctx.textAlign = 'center';
+          ctx.font = 'bold 10px "Press Start 2P", monospace';
+          ctx.fillText(`🏃 RESCUE METER ${Math.floor(this.rescueMeter)}%  ⏱️ ${Math.ceil(this.rescueTimer)}s`, cx, 46);
+          ctx.restore();
+        }
+
+        // G. RESCUE_FIGHT HUD
+        if (this.state === 'RESCUE_FIGHT') {
+          ctx.save();
+          const cx = CONFIG.canvas.width * 0.5;
+
+          // Round indicator
+          ctx.font = 'bold 11px "Press Start 2P", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#fbbf24';
+          ctx.fillText(`RESCUE FIGHT! Round ${CONFIG.fight.rounds - this.fightHitsLeft + 1}/${CONFIG.fight.rounds}`, cx, 20);
+
+          // Phase hint
+          let phaseHint = '';
+          if (this.fightPhase === 'TELEGRAPH') { ctx.fillStyle = '#f97316'; phaseHint = '⚠️ GET READY — DODGE!'; }
+          else if (this.fightPhase === 'STRIKE') { ctx.fillStyle = '#ef4444'; phaseHint = '⚡ DODGE NOW!'; }
+          else if (this.fightPhase === 'RECOVER') { ctx.fillStyle = '#4ade80'; phaseHint = '👊 HIT NOW — TAP ATTACK!'; }
+          ctx.font = 'bold 13px "Press Start 2P", monospace';
+          ctx.fillText(phaseHint, cx, 42);
+          ctx.restore();
+        }
+
+        // H. KIDNAP_CUTSCENE overlay
+        if (this.state === 'KIDNAP_CUTSCENE') {
+          ctx.save();
+          ctx.fillStyle = 'rgba(0,0,0,0.55)';
+          ctx.fillRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
+          ctx.font = 'bold 22px "Press Start 2P", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#ef4444';
+          ctx.shadowColor = '#ef4444'; ctx.shadowBlur = 14;
+          ctx.fillText('KIDNAPPED! 😱', CONFIG.canvas.width * 0.5, CONFIG.canvas.height * 0.38);
+          ctx.font = '15px sans-serif';
+          ctx.fillStyle = '#fca5a5'; ctx.shadowBlur = 0;
+          ctx.fillText('"Aiyoo! Kaapathunga!"', CONFIG.canvas.width * 0.5, CONFIG.canvas.height * 0.52);
+          ctx.font = 'bold 9px "Press Start 2P", monospace';
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText('(tap to skip)', CONFIG.canvas.width * 0.5, CONFIG.canvas.height * 0.68);
+          ctx.restore();
+        }
+
+        // I. HEROINE_RESCUED overlay
+        if (this.state === 'HEROINE_RESCUED') {
+          ctx.save();
+          ctx.fillStyle = 'rgba(244, 63, 94, 0.15)';
+          ctx.fillRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
+          ctx.font = 'bold 20px "Press Start 2P", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#f43f5e'; ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 16;
+          ctx.fillText('RESCUED! 💖', CONFIG.canvas.width * 0.5, CONFIG.canvas.height * 0.38);
+          ctx.font = '16px sans-serif'; ctx.fillStyle = '#fff'; ctx.shadowBlur = 0;
+          ctx.fillText('+500 POINTS!', CONFIG.canvas.width * 0.5, CONFIG.canvas.height * 0.52);
+          ctx.restore();
+        }
+      }
+
+      // ======================================================================
+      // MAIN RAF LOOP WITH DELTA TIME CLAMPING
+      // ======================================================================
+      gameLoop(timestamp) {
+        let dt = (timestamp - this.lastFrameTime) / 1000;
+        this.lastFrameTime = timestamp;
+
+        // Clamp dt to 0.08s to avoid physics tunneling after tab restore
+        dt = Math.min(0.08, Math.max(0.001, dt));
+
+        this.update(dt);
+        this.draw();
+
+        requestAnimationFrame((ts) => this.gameLoop(ts));
+      }
+    }
+
+    // Launch Game on Window Load
+    window.addEventListener('DOMContentLoaded', () => {
+      window.vickyGame = new Game();
+    });
+  </script>
+</body>
+
+</html>
